@@ -1,12 +1,41 @@
 cmake_minimum_required(VERSION 3.30)
 
-project(Sirkus VERSION 0.1.0)
+# make it easier to include cmake modules from ./cmake/
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Configre universal binaries which version of macOS to support
+# MUST be called before project()
+include(macos-defaults)
 
 # Always use the newest C++ standard on green-field projects if possible.
 # Currently, JUCE supports only C++ 20 cross-platform.
-set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_XCODE_GENERATE_SCHEME OFF)
-#set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+include(juce-defaults)
+
+# This is the internal name of the project and the name of JUCE's shared code target
+# Note: This cannot have spaces (it may be 2024, but you can't have it all!)
+# Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs display)
+# set(PROJECT_NAME "Sirkus")
+project(Sirkus VERSION 0.1.0)
+
+# Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs will display)
+# You can also just have it be the same thing as PROJECT_NAME
+# You may want to append the major version on the end of this (and PROJECT_NAME) ala:
+#   set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
+# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
+# allowing you to change parameters and behavior without breaking existing user projects
+set(PRODUCT_NAME "Sirkus")
+
+# Change me! Used for the MacOS bundle name and Installers
+set(COMPANY_NAME "Fader")
+
+# Change me! Used for the MacOS bundle identifier (and signing)
+set(BUNDLE_ID "uk.fader.sirkus")
+
+# Change me! Set the plugin formats you want built
+# Valid choices: AAX Unity VST VST3 AU AUv3 Standalone
+set(FORMATS Standalone AU VST3)
+
+
 # I like to download the dependencies to the same folder as the project.
 # If you want to install them system wide, set CPM_SOURCE_CACHE with the path to the dependencies
 # either as an environment variable or pass it to the cmake script with -DCPM_SOURCE_CACHE=<path>.
@@ -25,10 +54,11 @@ CPMAddPackage(
 )
 
 
+
 # Plugin definition using juce_add_plugin
 juce_add_plugin(${PROJECT_NAME}
-    VERSION 0.1.0                             # Plugin version number matches the .jucer file
-    COMPANY_NAME "Fader"                      # Plugin manufacturer
+    COMPANY_NAME "${COMPANY_NAME}"
+    BUNDLE_ID "${BUNDLE_ID}"
     IS_SYNTH FALSE                            # Not defined as a synth in .juce r
     NEEDS_MIDI_INPUT TRUE                     # pluginWantsMidiIn in .jucer
     NEEDS_MIDI_OUTPUT TRUE                    # pluginProducesMidiOut in .jucer
@@ -38,8 +68,8 @@ juce_add_plugin(${PROJECT_NAME}
     PLUGIN_MANUFACTURER_CODE FADR             # Matches the .jucer file
     PLUGIN_CODE SRKS                          # Matches the .jucer file
     PLUGIN_VST3_CATEGORY Fx                   # Matches the .jucer file
-    FORMATS AU VST3 Standalone                # Formats from .jucer file
-    PRODUCT_NAME "Sirkus"                     # Simplified product name for binaries
+    FORMATS "${FORMATS}"                      # Formats from .jucer file
+    PRODUCT_NAME "${PRODUCT_NAME}"                     # Simplified product name for binaries
 )
 
 juce_generate_juce_header(${PROJECT_NAME})
@@ -93,3 +123,5 @@ target_link_libraries(SharedCode
 # Link the JUCE plugin targets our SharedCode target
 target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 
+include(cmake/shared-code-defaults.cmake)
+include(cmake/sanitizers.cmake)
