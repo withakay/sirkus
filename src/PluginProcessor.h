@@ -9,6 +9,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "MidiEventGenerator.h"
+#include "TimingManager.h"
 
 //==============================================================================
 /**
@@ -53,7 +55,21 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    // Standalone timing control methods
+    void setStandaloneBpm(double bpm);
+    void startStandalonePlayback();
+    void stopStandalonePlayback();
+    bool isStandalonePlaying() const;
+    bool isInStandaloneMode() const;
+
+    // Direct access to timing manager
+    TimingManager& getTimingManager() { return timingManager; }
+    const TimingManager& getTimingManager() const { return timingManager; }
+
 private:
+    MidiEventGenerator midiGenerator;
+    TimingManager timingManager;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SirkusAudioProcessor)
 };

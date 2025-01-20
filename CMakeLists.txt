@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.30)
 # make it easier to include cmake modules from ./cmake/
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Configre universal binaries which version of macOS to support
+# Configure universal binaries which version of MacOS to support
 # MUST be called before project()
 include(macos-defaults)
 
@@ -53,8 +53,6 @@ CPMAddPackage(
     SOURCE_DIR ${LIB_DIR}/juce
 )
 
-
-
 # Plugin definition using juce_add_plugin
 juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME "${COMPANY_NAME}"
@@ -72,18 +70,24 @@ juce_add_plugin(${PROJECT_NAME}
     PRODUCT_NAME "${PRODUCT_NAME}"                     # Simplified product name for binaries
 )
 
-juce_generate_juce_header(${PROJECT_NAME})
-
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
 add_library(SharedCode INTERFACE)
 
 # Make sure you include any new source files here
 set(SourceFiles
-    src/PluginProcessor.cpp
-    src/PluginProcessor.h
+    src/InternalTransport.cpp
+    src/InternalTransport.h
+    src/MidiEventGenerator.cpp
+    src/MidiEventGenerator.h
     src/PluginEditor.cpp
     src/PluginEditor.h
+    src/PluginProcessor.cpp
+    src/PluginProcessor.h
+    src/TimingInfo.cpp
+    src/TimingInfo.h
+    src/TimingManager.cpp
+    src/TimingManager.h
 )
 
 # Make the SourceFiles buildable
@@ -94,7 +98,7 @@ include(cmake/xcode-prettify.cmake)
 # Set JUCE compile definitions
 target_compile_definitions(SharedCode
     INTERFACE
-    
+
     JUCE_WEB_BROWSER=0                     # Disabling web browser unless needed
     JUCE_USE_CURL=0                        # Disabling curl unless needed
     JUCE_VST3_CAN_REPLACE_VST2=0          # Matches .jucer file JUCE_VST3_CAN_REPLACE_VST2
@@ -110,6 +114,8 @@ target_compile_definitions(SharedCode
 # Link JUCE modules and recommended settings
 target_link_libraries(SharedCode
     INTERFACE
+
+    juce_audio_basics
     juce_audio_utils
     juce_gui_basics
     juce_gui_extra
@@ -122,6 +128,8 @@ target_link_libraries(SharedCode
 
 # Link the JUCE plugin targets our SharedCode target
 target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
+
+juce_generate_juce_header(${PROJECT_NAME})
 
 include(cmake/shared-code-defaults.cmake)
 include(cmake/sanitizers.cmake)

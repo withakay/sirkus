@@ -1,33 +1,29 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-//==============================================================================
-/**
-*/
-class SirkusAudioProcessorEditor  : public juce::AudioProcessorEditor
+class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                  public juce::Timer
 {
 public:
-    SirkusAudioProcessorEditor (SirkusAudioProcessor&);
+    explicit SirkusAudioProcessorEditor(SirkusAudioProcessor&);
     ~SirkusAudioProcessorEditor() override;
 
-    //==============================================================================
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
+    void timerCallback() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    SirkusAudioProcessor& audioProcessor;
+    SirkusAudioProcessor& processorRef;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SirkusAudioProcessorEditor)
+    juce::TextButton playButton {"Play"};
+    juce::Label positionLabel;
+    juce::Label bpmLabel;
+    juce::Label timeSignatureLabel;
+
+    void updatePositionDisplay();
+    void updateTransportDisplay();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessorEditor)
 };
