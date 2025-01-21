@@ -47,28 +47,28 @@ include(cmake/cpm.cmake)
 
 # This commands downloads AND configures JUCE. It sets up some variables, like JUCE_SOURCE_DIR.
 CPMAddPackage(
-    NAME JUCE
-    GIT_TAG 8.0.4
-    VERSION 8.0.4
-    GITHUB_REPOSITORY juce-framework/JUCE
-    SOURCE_DIR ${LIB_DIR}/juce
+        NAME JUCE
+        GIT_TAG 8.0.4
+        VERSION 8.0.4
+        GITHUB_REPOSITORY juce-framework/JUCE
+        SOURCE_DIR ${LIB_DIR}/juce
 )
 
 # Plugin definition using juce_add_plugin
 juce_add_plugin(${PROJECT_NAME}
-    COMPANY_NAME "${COMPANY_NAME}"
-    BUNDLE_ID "${BUNDLE_ID}"
-    IS_SYNTH FALSE                            # Not defined as a synth in .juce r
-    NEEDS_MIDI_INPUT TRUE                     # pluginWantsMidiIn in .jucer
-    NEEDS_MIDI_OUTPUT TRUE                    # pluginProducesMidiOut in .jucer
-    IS_MIDI_EFFECT TRUE                       # pluginIsMidiEffectPlugin in .jucer
-    EDITOR_WANTS_KEYBOARD_FOCUS TRUE          # Assuming the editor needs keyboard focus
-    COPY_PLUGIN_AFTER_BUILD TRUE              # Standard for plugin builds
-    PLUGIN_MANUFACTURER_CODE FADR             # Matches the .jucer file
-    PLUGIN_CODE SRKS                          # Matches the .jucer file
-    PLUGIN_VST3_CATEGORY Fx                   # Matches the .jucer file
-    FORMATS "${FORMATS}"                      # Formats from .jucer file
-    PRODUCT_NAME "${PRODUCT_NAME}"                     # Simplified product name for binaries
+        COMPANY_NAME "${COMPANY_NAME}"
+        BUNDLE_ID "${BUNDLE_ID}"
+        IS_SYNTH FALSE                            # Not defined as a synth in .juce r
+        NEEDS_MIDI_INPUT TRUE                     # pluginWantsMidiIn in .jucer
+        NEEDS_MIDI_OUTPUT TRUE                    # pluginProducesMidiOut in .jucer
+        IS_MIDI_EFFECT TRUE                       # pluginIsMidiEffectPlugin in .jucer
+        EDITOR_WANTS_KEYBOARD_FOCUS TRUE          # Assuming the editor needs keyboard focus
+        COPY_PLUGIN_AFTER_BUILD TRUE              # Standard for plugin builds
+        PLUGIN_MANUFACTURER_CODE FADR             # Matches the .jucer file
+        PLUGIN_CODE SRKS                          # Matches the .jucer file
+        PLUGIN_VST3_CATEGORY Fx                   # Matches the .jucer file
+        FORMATS "${FORMATS}"                      # Formats from .jucer file
+        PRODUCT_NAME "${PRODUCT_NAME}"            # Simplified product name for binaries
 )
 
 # This lets us use our code in both the JUCE targets and our Test target
@@ -77,18 +77,18 @@ add_library(SharedCode INTERFACE)
 
 # Make sure you include any new source files here
 set(SourceFiles
-    src/InternalTransport.cpp
-    src/InternalTransport.h
-    src/MidiEventGenerator.cpp
-    src/MidiEventGenerator.h
-    src/PluginEditor.cpp
-    src/PluginEditor.h
-    src/PluginProcessor.cpp
-    src/PluginProcessor.h
-    src/TimingInfo.cpp
-    src/TimingInfo.h
-    src/TimingManager.cpp
-    src/TimingManager.h
+        src/InternalTransport.cpp
+        src/InternalTransport.h
+        src/MidiEventGenerator.cpp
+        src/MidiEventGenerator.h
+        src/PluginEditor.cpp
+        src/PluginEditor.h
+        src/PluginProcessor.cpp
+        src/PluginProcessor.h
+        src/TimingInfo.cpp
+        src/TimingInfo.h
+        src/TimingManager.cpp
+        src/TimingManager.h
 )
 
 # Make the SourceFiles buildable
@@ -98,39 +98,41 @@ include(cmake/xcode-prettify.cmake)
 
 # Set JUCE compile definitions
 target_compile_definitions(SharedCode
-    INTERFACE
+        INTERFACE
 
-    JUCE_WEB_BROWSER=0                     # Disabling web browser unless needed
-    JUCE_USE_CURL=0                        # Disabling curl unless needed
-    JUCE_VST3_CAN_REPLACE_VST2=0          # Matches .jucer file JUCE_VST3_CAN_REPLACE_VST2
+        JUCE_WEB_BROWSER=0                     # Disabling web browser unless needed
+        JUCE_USE_CURL=0                        # Disabling curl unless needed
+        JUCE_VST3_CAN_REPLACE_VST2=0          # Matches .jucer file JUCE_VST3_CAN_REPLACE_VST2
 
-    # lets the app known if we're Debug or Release
-    CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
-    VERSION="${CURRENT_VERSION}"
+        # lets the app known if we're Debug or Release
+        CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+        VERSION="${CURRENT_VERSION}"
 
-    # JucePlugin_Name is for some reason doesn't use the nicer PRODUCT_NAME
-    PRODUCT_NAME_WITHOUT_VERSION="Sirkus"
+        # JucePlugin_Name is for some reason doesn't use the nicer PRODUCT_NAME
+        PRODUCT_NAME_WITHOUT_VERSION="Sirkus"
 )
+
+juce_generate_juce_header(${PROJECT_NAME})
 
 # Link JUCE modules and recommended settings
 target_link_libraries(SharedCode
-    INTERFACE
+        INTERFACE
 
-    juce_audio_basics
-    juce_audio_utils
-    juce_gui_basics
-    juce_gui_extra
-    juce_core
-    juce_data_structures
-    juce::juce_recommended_config_flags
-    juce::juce_recommended_lto_flags
-    juce::juce_recommended_warning_flags
+        juce_audio_basics
+        juce_audio_utils
+        juce_gui_basics
+        juce_gui_extra
+        juce_core
+        juce_data_structures
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags
 )
 
 # Link the JUCE plugin targets our SharedCode target
 target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 
-juce_generate_juce_header(${PROJECT_NAME})
+include_directories(${CMAKE_BINARY_DIR}/${PROJECT_NAME}_artefacts/JuceLibraryCode)
 
 include(cmake/shared-code-defaults.cmake)
 include(cmake/sanitizers.cmake)
