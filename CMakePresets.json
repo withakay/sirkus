@@ -43,8 +43,30 @@
     ],
     "buildPresets": [
         {
-            "name": "default",
-            "configurePreset": "default"
+            "name": "ninja-debug-vst3",
+            "displayName": "VST3 Debug",
+            "configurePreset": "ninja-debug",
+            "configuration": "Debug",
+            "targets": [
+                "Sirkus_VST3"
+            ]
+        },
+        {
+            "name": "ninja-release-vst3",
+            "displayName": "VST3 Release",
+            "configurePreset": "ninja-release",
+            "configuration": "Release",
+            "targets": [
+                "Sirkus_VST3"
+            ]
+        },
+        {
+            "name": "ninja-multi-vst3",
+            "displayName": "VST3 Multi-Config",
+            "configurePreset": "ninja-multi",
+            "targets": [
+                "Sirkus_VST3"
+            ]
         }
     ]
 }

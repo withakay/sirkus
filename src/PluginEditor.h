@@ -18,6 +18,7 @@ private:
     SirkusAudioProcessor& processorRef;
 
     juce::TextButton playButton {"Play"};
+    juce::ToggleButton hostSyncButton {"Sync to Host"};
     juce::Label positionLabel;
     juce::Label bpmLabel;
     juce::Label timeSignatureLabel;

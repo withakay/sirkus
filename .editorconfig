@@ -1,0 +1,43 @@
+# Unix-style newlines with a newline ending every file
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+max_line_length = 120
+
+[*.{c++,cc,cpp,cxx,h,h++,hh,hpp,hxx,inl,ipp,tlh,tli}]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+
+# Use 4 spaces for the Python files
+[*.py]
+indent_size = 4
+max_line_length = 120
+
+[**.*sh]
+binary_next_line            = true  # like -bn
+switch_case_indent          = true  # like -ci
+space_redirects             = true  # like -sr
+keep_padding                = false # like -kp
+# end_of_line                 = lf
+# charset                     = utf-8
+# trim_trailing_whitespace    = true
+# insert_final_newline        = true
+
+
+# Makefiles always use tabs for indentation
+[Makefile]
+indent_style = tab
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Dockerfile]
+indent_size = 4
+
