@@ -55,12 +55,16 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    // Standalone timing control methods
+    // Timing control methods
     void setStandaloneBpm(double bpm);
     void startStandalonePlayback();
     void stopStandalonePlayback();
     bool isStandalonePlaying() const;
     bool isInStandaloneMode() const;
+
+    // Host sync control
+    void setHostSyncEnabled(bool enabled) { timingManager.setHostSyncEnabled(enabled); }
+    [[nodiscard]] bool isHostSyncEnabled() const { return timingManager.isHostSyncEnabled(); }
 
     // Direct access to timing manager
     TimingManager& getTimingManager() { return timingManager; }
