@@ -1,0 +1,72 @@
+---
+Checks: >
+  *,
+  -fuchsia-*,
+  -google-*,
+  -zircon-*,
+  -abseil-*,
+  -modernize-use-trailing-return-type,
+  -llvm-*,
+  -llvmlibc-*,
+  readability-identifier-naming
+
+CheckOptions:
+  # Class naming
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassPrefix
+    value: ''
+
+  # Method naming
+  - key: readability-identifier-naming.MethodCase
+    value: camelBack
+
+  # Variable naming
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.MemberVariableCase
+    value: camelBack
+
+  # Parameter naming
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+
+  # Constant naming
+  - key: readability-identifier-naming.ConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: camelBack
+
+  # Enum naming
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+
+  # Template parameter naming
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: CamelCase
+
+  # Namespace naming
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+
+  # Typedef and using naming
+  - key: readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
+
+  # Function naming
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+
+  # Global variable naming
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE
+
+  # Struct naming
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase

@@ -1,17 +1,18 @@
 #include "TimingManager.h"
 
+namespace sirkus {
 TimingManager::TimingManager()
-    : standaloneMode(false)
-    , hostSyncEnabled(true)
+        : standaloneMode(false)
+        , hostSyncEnabled(true)
 {
 }
 
-void TimingManager::prepare(double sampleRate)
+void TimingManager::prepare(const double sampleRate)
 {
     internalTransport.prepare(sampleRate);
 }
 
-void TimingManager::processBlock(juce::AudioPlayHead* playHead, int numSamples)
+void TimingManager::processBlock(const juce::AudioPlayHead* playHead, const int numSamples)
 {
     if (playHead != nullptr && hostSyncEnabled)
     {
@@ -51,3 +52,4 @@ std::optional<std::pair<int, int>> TimingManager::getTimeSignature() const
 {
     return currentTiming.timeSignature;
 }
+} // namespace sirkus

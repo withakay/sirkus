@@ -1,10 +1,10 @@
 #pragma once
 
-#include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor,
-                                  public juce::Timer
+#include <JuceHeader.h>
+
+class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
     explicit SirkusAudioProcessorEditor(SirkusAudioProcessor&);
@@ -17,8 +17,8 @@ public:
 private:
     SirkusAudioProcessor& processorRef;
 
-    juce::TextButton playButton {"Play"};
-    juce::ToggleButton hostSyncButton {"Sync to Host"};
+    juce::TextButton playButton{"Play"};
+    juce::ToggleButton hostSyncButton{"Sync to Host"};
     juce::Label positionLabel;
     juce::Label bpmLabel;
     juce::Label timeSignatureLabel;

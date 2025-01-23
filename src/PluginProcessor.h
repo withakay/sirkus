@@ -8,14 +8,13 @@
 
 #pragma once
 
+#include "Sequencer.h"
 #include <JuceHeader.h>
-#include "MidiEventGenerator.h"
-#include "TimingManager.h"
 
 //==============================================================================
 /**
-*/
-class SirkusAudioProcessor  : public juce::AudioProcessor
+ */
+class SirkusAudioProcessor : public juce::AudioProcessor
 {
 public:
     //==============================================================================
@@ -23,14 +22,14 @@ public:
     ~SirkusAudioProcessor() override;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
+#ifndef JucePlugin_PreferredChannelConfigurations
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+#endif
 
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -47,13 +46,13 @@ public:
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
+    void changeProgramName(int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation(juce::MemoryBlock& destData) override;
+    void setStateInformation(const void* data, int sizeInBytes) override;
 
     // Timing control methods
     void setStandaloneBpm(double bpm);
@@ -63,17 +62,16 @@ public:
     bool isInStandaloneMode() const;
 
     // Host sync control
-    void setHostSyncEnabled(bool enabled) { timingManager.setHostSyncEnabled(enabled); }
-    [[nodiscard]] bool isHostSyncEnabled() const { return timingManager.isHostSyncEnabled(); }
+    void setHostSyncEnabled(bool enabled) { sequencer.getTimingManager().setHostSyncEnabled(enabled); }
+    [[nodiscard]] bool isHostSyncEnabled() const { return sequencer.getTimingManager().isHostSyncEnabled(); }
 
-    // Direct access to timing manager
-    TimingManager& getTimingManager() { return timingManager; }
-    const TimingManager& getTimingManager() const { return timingManager; }
+    // Direct access to sequencer
+    sirkus::Sequencer& getSequencer() { return sequencer; }
+    const sirkus::Sequencer& getSequencer() const { return sequencer; }
 
 private:
-    MidiEventGenerator midiGenerator;
-    TimingManager timingManager;
+    sirkus::Sequencer sequencer;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SirkusAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessor)
 };

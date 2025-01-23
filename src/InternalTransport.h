@@ -2,6 +2,7 @@
 
 #include "TimingInfo.h"
 
+namespace sirkus {
 class InternalTransport
 {
 public:
@@ -19,6 +20,7 @@ public:
     void start();
     void stop();
     void setPositionInBars(int bar, int beat = 1, double tick = 0.0);
+
     [[nodiscard]] bool isPlaying() const { return playing; }
 
 private:
@@ -37,3 +39,4 @@ private:
     [[nodiscard]] double ppqPositionToBeats(double ppq) const;
     [[nodiscard]] double beatsToNextBar(const MusicalPosition& pos) const;
 };
+} // namespace sirkus

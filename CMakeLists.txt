@@ -77,10 +77,9 @@ add_library(SharedCode INTERFACE)
 
 # Make sure you include any new source files here
 set(SourceFiles
+        src/Constants.h
         src/InternalTransport.cpp
         src/InternalTransport.h
-        src/MidiEventGenerator.cpp
-        src/MidiEventGenerator.h
         src/PluginEditor.cpp
         src/PluginEditor.h
         src/PluginProcessor.cpp
@@ -89,6 +88,8 @@ set(SourceFiles
         src/TimingInfo.h
         src/TimingManager.cpp
         src/TimingManager.h
+        src/Track.cpp
+        src/Track.h
 )
 
 # Make the SourceFiles buildable

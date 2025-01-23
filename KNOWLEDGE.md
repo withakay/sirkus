@@ -12,45 +12,113 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
 - Real-time processing considerations
 - Testable and mockable components
 
+### Coding Standards
+- Naming Conventions (enforced by clang-tidy):
+  - Classes: CamelCase (e.g., StepProcessor)
+  - Methods: camelCase (e.g., processBlock)
+  - Variables: camelCase (e.g., midiChannel)
+  - Constants: UPPER_CASE (e.g., MAX_STEPS)
+  - No underscores in names unless necessary for readability
+  - Namespaces: lowercase (e.g., sirkus)
+
 ### Key Components
-1. **Transport System**
+1. **Sequencer**
+   - Central orchestrator of the plugin
+   - Manages tracks (1 to MAX_TRACKS)
+   - Owns TimingManager and StepProcessor
+   - Handles global parameters (swing, scale)
+   - Provides track lifecycle management
+
+2. **Scale System**
+   - Comprehensive musical scale support
+   - Built-in scales (Major, Minor, Modes, etc.)
+   - Custom scale definition
+   - Multiple quantization modes:
+     - Up: Quantize to next scale note
+     - Down: Quantize to previous scale note
+     - Random: Randomly choose between up/down
+   - Per-track scale settings
+   - Global scale control
+
+3. **Step System**
+   - Grid-based step placement (64th to 4 bars)
+   - Independent note lengths (128th to 16 bars)
+   - Sample-accurate timing
+   - Length-aware MIDI generation
+   - Swing and offset support
+   - Scale quantization integration
+   - Pattern-based organization
+
+4. **Transport System**
    - Internal transport management
    - Host synchronization
    - MIDI clock handling
 
-2. **Timing System**
-   - PPQ-based timing
-   - Time division handling
-   - Swing processing
-
-3. **MIDI Event Generation**
-   - Step-based event generation
-   - Real-time MIDI output
-   - Event processing pipeline
-
-4. **Step Sequencing**
-   - Pattern-based sequencing
-   - Complex rhythmic features
-   - Scale-aware note processing
-
 ## Data Structures
 
 ### Core Structures
-1. **Track**
-   - Time division configuration
-   - Step storage
-   - Modulation routing
-   - Polyrhythmic properties
+1. **Step**
+   - Note properties (note, velocity)
+   - Timing properties:
+     - Note length (128th to 16 bars)
+     - Grid offset
+     - Swing participation
+   - Probability control
+   - Track ownership reference
+   - Length-aware timing calculations
 
-2. **Step Types**
-   - Note steps with repeat capabilities
-   - CC/NRPN steps
-   - Auxiliary events
+2. **Pattern**
+   - Step storage and management
+   - Grid-based step placement:
+     - Configurable step interval (64th to 4 bars)
+     - Pattern length control
+     - Swing settings
+   - Step timing calculations:
+     - Grid-based positioning
+     - Swing application
+     - Offset handling
+     - Pattern wrapping
 
-3. **Modulation System**
-   - Modulation routes
-   - Accumulator processing
-   - State management
+3. **StepProcessor**
+   - MIDI event generation
+   - Length-aware note timing
+   - Note-off event management
+   - Scale quantization
+   - Future: Modulation processing
+
+4. **Scale**
+   - Built-in scale definitions
+   - Custom scale support
+   - Note quantization algorithms
+   - Root note management
+
+### Timing Constants
+- PPQN (Pulses Per Quarter Note): 960
+
+#### Step Intervals (Grid Spacing)
+- 64th note: 60 ticks
+- 32nd note: 120 ticks
+- 16th note: 240 ticks
+- 8th note: 480 ticks
+- Quarter note: 960 ticks
+- Half note: 1920 ticks
+- Whole note: 3840 ticks
+- Two bars: 7680 ticks
+- Four bars: 15360 ticks
+
+#### Note Lengths (Duration)
+- 128th note: 30 ticks
+- 64th note: 60 ticks
+- 32nd note: 120 ticks
+- 16th note: 240 ticks
+- 8th note: 480 ticks
+- Quarter note: 960 ticks
+- Half note: 1920 ticks
+- Whole note: 3840 ticks
+- Two bars: 7680 ticks
+- Four bars: 15360 ticks
+- Eight bars: 30720 ticks
+- Sixteen bars: 61440 ticks
 
 ### State Management
 - Sequence state
@@ -62,21 +130,40 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
 
 ### Completed Components
 - Basic project structure with CMake build system
-- JUCE plugin infrastructure (AudioProcessor, Editor)
-- Timing management system with:
-  - Host sync capabilities (TimingManager)
-  - Internal transport with BPM and time signature control
-  - Musical position tracking
+- JUCE plugin infrastructure
+- Timing management system
+- MIDI infrastructure
+- Pattern/Track separation
+- Scale System:
+  - Comprehensive scale implementation
+  - Multiple quantization modes
+  - Global and per-track settings
+- Step System:
+  - Separate step interval (grid) and note length
+  - Grid spacing from 64th to 4 bars
+  - Note lengths from 128th to 16 bars
+  - Length-aware MIDI generation
   - Sample-accurate timing
-- MIDI infrastructure:
-  - Basic event generation framework (PPQN = 960)
-  - Sample-accurate event timing
+  - Pattern wrapping
+  - Note-off event management
+- Code Quality:
+  - Consistent naming conventions
+  - clang-tidy configuration
+  - clang-format configuration
+- Sequencer Implementation:
+  - Central orchestration
+  - Track management
+  - Global parameter control
+  - Integrated timing and MIDI processing
 
 ### In Progress
-- Transport system refinement
-- MIDI event generation expansion
-- Step sequencing core implementation
-- Pattern management system design
+- Pattern management system:
+  - Pattern switching mechanism
+  - Pattern chaining
+  - Pattern bank management
+- Step processor expansion:
+  - Modulation framework design
+  - Cross-track parameter control
 
 ### Planned Features
 1. Core Engine (Epic 1)
@@ -116,12 +203,12 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
 - Performance monitoring
 
 ### MIDI System
-- High-resolution PPQN (960) for accurate timing
+- High-resolution PPQN (960)
 - Sample-accurate event generation
+- Length-aware note timing
 - Host-synchronized timing
-- Buffer management with JUCE MidiBuffer
-- Standalone and plugin mode support
-- Extensible event generation pipeline
+- Buffer management
+- Extensible event pipeline
 
 ### Plugin Integration
 - JUCE plugin wrapper

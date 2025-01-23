@@ -1,15 +1,18 @@
 #include "InternalTransport.h"
-#include "MidiEventGenerator.h"
+
+#include "Constants.h"
+
 #include <utility>
 
+namespace sirkus {
 InternalTransport::InternalTransport()
     : sampleRate(44100.0)
-    , bpm(120.0)
-    , ppqPosition(0.0)
-    , samplesPerQuarterNote(0.0)
-    , playing(false)
-    , timeSigNumerator(4)
-    , timeSigDenominator(4)
+      , bpm(120.0)
+      , ppqPosition(0.0)
+      , samplesPerQuarterNote(0.0)
+      , playing(false)
+      , timeSigNumerator(4)
+      , timeSigDenominator(4)
 {
     updateTimingInfo();
 }
@@ -71,7 +74,7 @@ void InternalTransport::setPositionInBars(int bar, int beat, double tick)
 
     // Convert bar/beat/tick to PPQ
     const double beatsPerBar = timeSigNumerator * (4.0 / timeSigDenominator);
-    const double totalBeats = (bar - 1) * beatsPerBar + (beat - 1) + (tick / MidiEventGenerator::PPQN);
+    const double totalBeats = (bar - 1) * beatsPerBar + (beat - 1) + (tick / sirkus::PPQN);
     ppqPosition = totalBeats * (4.0 / timeSigDenominator);
 }
 
@@ -88,7 +91,7 @@ void InternalTransport::updateMusicalPosition()
 
     musicalPosition.bar = static_cast<int>(totalBeats / beatsPerBar) + 1;
     musicalPosition.beat = static_cast<int>(std::fmod(totalBeats, beatsPerBar)) + 1;
-    musicalPosition.tick = std::fmod(totalBeats, 1.0) * MidiEventGenerator::PPQN;
+    musicalPosition.tick = std::fmod(totalBeats, 1.0) * sirkus::PPQN;
 }
 
 double InternalTransport::ppqPositionToBeats(double ppq) const
@@ -99,5 +102,6 @@ double InternalTransport::ppqPositionToBeats(double ppq) const
 double InternalTransport::beatsToNextBar(const MusicalPosition& pos) const
 {
     const double beatsPerBar = timeSigNumerator * (4.0 / timeSigDenominator);
-    return beatsPerBar - ((pos.beat - 1) + (pos.tick / MidiEventGenerator::PPQN));
+    return beatsPerBar - ((pos.beat - 1) + (pos.tick / sirkus::PPQN));
 }
+} // namespace sirkus
