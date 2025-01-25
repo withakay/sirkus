@@ -5,6 +5,7 @@
 #include "PluginProcessor.h"
 #include "ui/GlobalControls.h"
 #include "ui/PatternView.h"
+#include "ui/SirkusLookAndFeel.h"
 #include "ui/StepControls.h"
 #include "ui/TransportControls.h"
 
@@ -25,6 +26,9 @@ public:
 
 private:
     SirkusAudioProcessor& processorRef;
+
+    // Custom look and feel
+    sirkus::ui::SirkusLookAndFeel lookAndFeel;
 
     // UI Components
     sirkus::ui::TransportControls transportControls;
@@ -63,6 +67,7 @@ private:
     void updateTransportDisplay();
     void updatePatternView();
     void updateSelectedSteps();
+    void updatePlaybackPosition();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessorEditor)
 };

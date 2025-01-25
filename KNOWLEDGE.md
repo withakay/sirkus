@@ -146,6 +146,53 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
 - Event processing context
 - Real-time parameter updates
 
+### UI Architecture
+
+1. **Component Hierarchy**
+   - StepButton: Individual step UI with selection support
+   - StepTrack: Track-level step management and selection
+   - PatternView: Multi-track coordination and global selection
+   - StepControls: Parameter editing for selected steps
+   - GlobalControls: Pattern-wide settings
+
+2. **Selection System**
+   - Multi-mode selection:
+     - Single click: Select individual step
+     - Cmd/Ctrl+click: Add/remove from selection
+     - Shift+click: Range selection within track
+   - Selection state management:
+     - Per-track selection tracking
+     - Cross-track selection coordination
+     - Parameter synchronization
+   - Type-safe implementation:
+     - Careful handling of signed/unsigned conversions
+     - Explicit bounds checking
+     - Safe MIDI value handling
+
+3. **Event System**
+   - Hierarchical event propagation:
+     - StepButton -> StepTrack: Local state changes
+     - StepTrack -> PatternView: Track-level updates
+     - PatternView -> Editor: Global state changes
+   - Parameter synchronization:
+     - Selection-aware parameter updates
+     - Batch updates for multiple steps
+     - Real-time value propagation
+
+4. **UI State Management**
+   - Component state tracking:
+     - Step enabled/disabled state
+     - Selection state
+     - Parameter values
+   - Visual feedback:
+     - Selection highlighting
+     - Trigger indicators
+     - Parameter value display
+   - Page management:
+     - 16-step visible window
+     - Pattern length up to 128 steps
+     - Page navigation controls
+
 ## Development Progress
 
 ### Completed Components
@@ -175,6 +222,21 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
   - Track management
   - Global parameter control
   - Integrated timing and MIDI processing
+- UI System:
+  - Component hierarchy with selection support
+  - Multi-mode step selection:
+    - Single click selection
+    - Cmd/Ctrl+click for multi-select
+    - Shift+click for range selection
+  - Parameter editing for selected steps
+  - Page navigation for patterns > 16 steps
+  - Track-level MIDI channel control
+  - Type-safe implementation:
+    - Proper signed/unsigned handling
+    - Array bounds checking
+    - Safe MIDI value conversions
+  - Real-time parameter updates
+  - Visual feedback system
 
 ### In Progress
 - Pattern management system:
@@ -184,6 +246,19 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
 - Step processor expansion:
   - Modulation framework design
   - Cross-track parameter control
+- UI Enhancements:
+  - Keyboard shortcuts:
+    - Cmd/Ctrl+A for select all
+    - Delete/Backspace to clear steps
+    - Copy/paste functionality
+  - Selection improvements:
+    - Drag selection support
+    - Better visual feedback
+    - Selection across pages
+  - Visual refinements:
+    - Improved step highlighting
+    - Parameter value visualization
+    - Animated transitions
 
 ### Planned Features
 1. Core Engine (Epic 1)

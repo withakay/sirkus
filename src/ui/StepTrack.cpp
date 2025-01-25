@@ -35,56 +35,6 @@ StepTrack::~StepTrack() {
     button->removeListener(this);
 }
 
-void StepTrack::setMidiChannel(int channel) {
-  if (midiChannel != channel) {
-    midiChannel = channel;
-    listeners.call(
-        [this](Listener &l) { l.trackMidiChannelChanged(this, midiChannel); });
-  }
-}
-
-void StepTrack::setCurrentPage(int newPage) {
-  if (currentPage != newPage && newPage >= 0 && newPage < totalPages) {
-    currentPage = newPage;
-    // Update button states based on new page
-    repaint();
-  }
-}
-
-void StepTrack::setTotalPages(int numPages) {
-  if (totalPages != numPages && numPages > 0) {
-    totalPages = numPages;
-    currentPage = juce::jmin(currentPage, totalPages - 1);
-    repaint();
-  }
-}
-
-void StepTrack::setTrackNumber(int number) {
-  if (trackNumber != number) {
-    trackNumber = number;
-    trackLabel->setText("Track " + juce::String(number + 1),
-                        juce::dontSendNotification);
-  }
-}
-
-void StepTrack::setZoomFactor(float factor) {
-  static constexpr float epsilon = 0.0001f;
-  if (std::abs(zoomFactor - factor) > epsilon) {
-    zoomFactor = factor;
-    for (auto &button : stepButtons)
-      button->setZoomFactor(factor);
-    resized();
-  }
-}
-
-void StepTrack::clearStepSelection() {
-  selectedStepIndices.clear();
-  lastSelectedStepIndex = -1;
-
-  for (auto &button : stepButtons)
-    button->setSelected(false);
-}
-
 void StepTrack::paint(juce::Graphics &g) {
   g.fillAll(juce::Colours::darkgrey);
 
@@ -112,6 +62,70 @@ void StepTrack::resized() {
   for (auto &button : stepButtons) {
     button->setBounds(buttonBounds.withWidth(buttonWidth));
     buttonBounds.translate(buttonWidth + buttonSpacing, 0);
+  }
+}
+
+void StepTrack::setMidiChannel(int channel) {
+  if (midiChannel != channel) {
+    midiChannel = channel;
+    listeners.call(
+        [this](Listener &l) { l.trackMidiChannelChanged(this, midiChannel); });
+  }
+}
+
+void StepTrack::setTrackNumber(int number) {
+  if (trackNumber != number) {
+    trackNumber = number;
+    trackLabel->setText("Track " + juce::String(number + 1),
+                        juce::dontSendNotification);
+  }
+}
+
+void StepTrack::setZoomFactor(float factor) {
+  static constexpr float epsilon = 0.0001f;
+  if (std::abs(zoomFactor - factor) > epsilon) {
+    zoomFactor = factor;
+    for (auto &button : stepButtons)
+      button->setZoomFactor(factor);
+    resized();
+  }
+}
+
+void StepTrack::setCurrentPage(int newPage) {
+  if (currentPage != newPage && newPage >= 0 && newPage < totalPages) {
+    currentPage = newPage;
+    // Update button states based on new page
+    repaint();
+  }
+}
+
+void StepTrack::setTotalPages(int numPages) {
+  if (totalPages != numPages && numPages > 0) {
+    totalPages = numPages;
+    currentPage = juce::jmin(currentPage, totalPages - 1);
+    repaint();
+  }
+}
+
+void StepTrack::clearStepSelection() {
+  selectedStepIndices.clear();
+  lastSelectedStepIndex = -1;
+
+  for (auto &button : stepButtons)
+    button->setSelected(false);
+}
+
+void StepTrack::clearAllTriggers() {
+  for (auto &button : stepButtons)
+    button->setTriggered(false);
+}
+
+void StepTrack::setStepTriggered(int stepIndex, bool triggered) {
+  // Convert global step index to visible step index
+  int visibleIndex = stepIndex % VISIBLE_STEPS;
+  if (visibleIndex >= 0 &&
+      static_cast<size_t>(visibleIndex) < stepButtons.size()) {
+    stepButtons[static_cast<size_t>(visibleIndex)]->setTriggered(triggered);
   }
 }
 

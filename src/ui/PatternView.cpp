@@ -1,4 +1,5 @@
 #include "PatternView.h"
+#include "../Constants.h"
 
 namespace sirkus::ui {
 
@@ -10,7 +11,7 @@ PatternView::PatternView() {
 
   patternLengthSlider = std::make_unique<juce::Slider>(
       juce::Slider::LinearHorizontal, juce::Slider::TextBoxRight);
-  patternLengthSlider->setRange(1, MAX_STEPS, 1);
+  patternLengthSlider->setRange(1, sirkus::MAX_STEPS, 1);
   patternLengthSlider->setValue(patternLength, juce::dontSendNotification);
   patternLengthSlider->onValueChange = [this] {
     setPatternLength(static_cast<int>(patternLengthSlider->getValue()));
@@ -58,8 +59,37 @@ PatternView::~PatternView() {
     track->removeListener(this);
 }
 
+void PatternView::paint(juce::Graphics &g) { g.fillAll(juce::Colours::black); }
+
+void PatternView::resized() {
+  auto bounds = getLocalBounds();
+
+  // Layout controls at top
+  auto topControls = bounds.removeFromTop(40);
+
+  patternLengthLabel->setBounds(topControls.removeFromLeft(100));
+  patternLengthSlider->setBounds(topControls.removeFromLeft(200));
+
+  auto pageControls = topControls.removeFromLeft(200);
+  prevPageButton->setBounds(pageControls.removeFromLeft(40));
+  nextPageButton->setBounds(pageControls.removeFromRight(40));
+  pageLabel->setBounds(pageControls);
+
+  zoomSlider->setBounds(topControls.removeFromLeft(150));
+
+  // Layout tracks
+  bounds.removeFromTop(10); // Spacing
+  const int trackHeight =
+      (bounds.getHeight() - ((NUM_TRACKS - 1) * 10)) / NUM_TRACKS;
+
+  for (auto &track : tracks) {
+    track->setBounds(bounds.removeFromTop(trackHeight));
+    bounds.removeFromTop(10); // Spacing between tracks
+  }
+}
+
 void PatternView::setPatternLength(int numSteps) {
-  numSteps = juce::jlimit(1, MAX_STEPS, numSteps);
+  numSteps = juce::jlimit(1, sirkus::MAX_STEPS, numSteps);
   if (patternLength != numSteps) {
     patternLength = numSteps;
     updatePatternLength();
@@ -99,6 +129,19 @@ void PatternView::clearAllStepSelections() {
   listeners.call([this](Listener &l) { l.stepSelectionChanged(this); });
 }
 
+void PatternView::clearAllTriggers() {
+  for (auto &track : tracks)
+    track->clearAllTriggers();
+}
+
+void PatternView::setStepTriggered(int trackIndex, int stepIndex,
+                                   bool triggered) {
+  if (trackIndex >= 0 && static_cast<size_t>(trackIndex) < tracks.size()) {
+    tracks[static_cast<size_t>(trackIndex)]->setStepTriggered(stepIndex,
+                                                              triggered);
+  }
+}
+
 const std::vector<int> &
 PatternView::getSelectedStepsForTrack(int trackIndex) const {
   static const std::vector<int> emptySelection;
@@ -122,33 +165,10 @@ std::vector<std::pair<int, int>> PatternView::getAllSelectedSteps() const {
   return allSelected;
 }
 
-void PatternView::paint(juce::Graphics &g) { g.fillAll(juce::Colours::black); }
+void PatternView::addListener(Listener *listener) { listeners.add(listener); }
 
-void PatternView::resized() {
-  auto bounds = getLocalBounds();
-
-  // Layout controls at top
-  auto topControls = bounds.removeFromTop(40);
-
-  patternLengthLabel->setBounds(topControls.removeFromLeft(100));
-  patternLengthSlider->setBounds(topControls.removeFromLeft(200));
-
-  auto pageControls = topControls.removeFromLeft(200);
-  prevPageButton->setBounds(pageControls.removeFromLeft(40));
-  nextPageButton->setBounds(pageControls.removeFromRight(40));
-  pageLabel->setBounds(pageControls);
-
-  zoomSlider->setBounds(topControls.removeFromLeft(150));
-
-  // Layout tracks
-  bounds.removeFromTop(10); // Spacing
-  const int trackHeight =
-      (bounds.getHeight() - ((NUM_TRACKS - 1) * 10)) / NUM_TRACKS;
-
-  for (auto &track : tracks) {
-    track->setBounds(bounds.removeFromTop(trackHeight));
-    bounds.removeFromTop(10); // Spacing between tracks
-  }
+void PatternView::removeListener(Listener *listener) {
+  listeners.remove(listener);
 }
 
 void PatternView::trackMidiChannelChanged(StepTrack *track, int newChannel) {
@@ -168,12 +188,6 @@ void PatternView::stepStateChanged(StepTrack *track, int stepIndex) {
     // Selection may have changed
     listeners.call([this](Listener &l) { l.stepSelectionChanged(this); });
   }
-}
-
-void PatternView::addListener(Listener *listener) { listeners.add(listener); }
-
-void PatternView::removeListener(Listener *listener) {
-  listeners.remove(listener);
 }
 
 void PatternView::updatePageControls() {

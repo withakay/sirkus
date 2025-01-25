@@ -1,63 +1,13 @@
 #pragma once
 
-#include "../Constants.h"
-#include "../Types.h"
 #include "StepButton.h"
-#include <juce_gui_basics/juce_gui_basics.h>
+#include <JuceHeader.h>
+#include <vector>
 
 namespace sirkus::ui {
 
-/**
- * @class StepTrack
- * @brief A component that represents a single track in the sequencer.
- *
- * Contains a row of StepButtons and track-specific controls like MIDI channel
- * selection. Handles paging for patterns longer than the visible width.
- */
 class StepTrack : public juce::Component, private StepButton::Listener {
 public:
-  //==============================================================================
-  StepTrack();
-  ~StepTrack() override;
-
-  //==============================================================================
-  /** Sets the MIDI channel for this track (0-15, 0 = omni) */
-  void setMidiChannel(int channel);
-
-  /** Gets the current MIDI channel */
-  int getMidiChannel() const noexcept { return midiChannel; }
-
-  /** Sets the current page (for patterns > 16 steps) */
-  void setCurrentPage(int newPage);
-
-  /** Gets the current page */
-  int getCurrentPage() const noexcept { return currentPage; }
-
-  /** Sets the total number of pages */
-  void setTotalPages(int numPages);
-
-  /** Gets the total number of pages */
-  int getTotalPages() const noexcept { return totalPages; }
-
-  /** Sets the track number/ID */
-  void setTrackNumber(int number);
-
-  /** Gets the track number/ID */
-  int getTrackNumber() const noexcept { return trackNumber; }
-
-  /** Sets the zoom factor for all step buttons */
-  void setZoomFactor(float factor);
-
-  /** Clears all step selections */
-  void clearStepSelection();
-
-  /** Gets the currently selected step indices */
-  const std::vector<int> &getSelectedStepIndices() const {
-    return selectedStepIndices;
-  }
-
-  //==============================================================================
-  /** Callback interface for track events */
   class Listener {
   public:
     virtual ~Listener() = default;
@@ -65,42 +15,60 @@ public:
     virtual void stepStateChanged(StepTrack *track, int stepIndex) = 0;
   };
 
-  void addListener(Listener *listener);
-  void removeListener(Listener *listener);
+  static constexpr int VISIBLE_STEPS = 16;
 
-  //==============================================================================
-  /** @internal */
-  void paint(juce::Graphics &g) override;
+  StepTrack();
+  ~StepTrack() override;
+
+  void paint(juce::Graphics &) override;
   void resized() override;
 
-private:
-  //==============================================================================
-  /** StepButton::Listener implementation */
+  // Track settings
+  void setMidiChannel(int channel);
+  void setTrackNumber(int number);
+  void setZoomFactor(float factor);
+
+  // Page management
+  void setCurrentPage(int newPage);
+  void setTotalPages(int numPages);
+
+  // Selection methods
+  void clearStepSelection();
+  const std::vector<int> &getSelectedStepIndices() const {
+    return selectedStepIndices;
+  }
+
+    // Trigger methods
+    void clearAllTriggers();
+    void setStepTriggered(int stepIndex, bool triggered);
+
+    void addListener(Listener *listener);
+    void removeListener(Listener *listener);
+
+  private:
+  // StepButton::Listener implementation
   void stepButtonClicked(StepButton *button,
                          const juce::ModifierKeys &mods) override;
   void stepButtonStateChanged(StepButton *button) override;
   void stepButtonRangeSelect(StepButton *button) override;
 
-  std::vector<std::unique_ptr<StepButton>> stepButtons;
-  std::unique_ptr<juce::ComboBox> midiChannelSelector;
-  std::unique_ptr<juce::Label> trackLabel;
-
-  int midiChannel = 0; // 0 = omni
-  int currentPage = 0;
-  int totalPages = 1;
-  int trackNumber = 0;
-  float zoomFactor = 1.0f;
-
-  std::vector<int> selectedStepIndices;
-  int lastSelectedStepIndex = -1; // For range selection
-
-  static constexpr int VISIBLE_STEPS = 16;
-
-  juce::ListenerList<Listener> listeners;
-
   void handleStepSelection(StepButton *button, const juce::ModifierKeys &mods);
   void selectStepRange(int fromIndex, int toIndex);
   int getStepButtonIndex(StepButton *button) const;
+
+  std::unique_ptr<juce::ComboBox> midiChannelSelector;
+  std::unique_ptr<juce::Label> trackLabel;
+  std::vector<std::unique_ptr<StepButton>> stepButtons;
+  std::vector<int> selectedStepIndices;
+
+  int midiChannel{-1}; // -1 = omni
+  int trackNumber{0};
+  int currentPage{0};
+  int totalPages{1};
+  float zoomFactor{1.0f};
+  int lastSelectedStepIndex{-1};
+
+  juce::ListenerList<Listener> listeners;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StepTrack)
 };

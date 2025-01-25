@@ -9,12 +9,15 @@
      - on/off state
      - enabled state
      - trigger indicator
+     - selection state
      - note value
      - velocity
      - note length
-   - Appearance:
+   - Behavior:
+     - Left click toggles enabled state
+     - Cmd/Ctrl+click for multi-selection
+     - Shift+click for range selection
      - Visual feedback for different states
-     - Size should scale with zoom level
 
 2. `StepTrack` (sirkus::ui::StepTrack)
    - Contains:
@@ -24,7 +27,9 @@
        - Track number indicator
    - Behavior:
      - Handles paging for patterns > 16 steps
+     - Manages step selection within track
      - Updates step buttons based on current page
+     - Tracks last selected step for range selection
 
 3. `PatternView` (sirkus::ui::PatternView)
    - Contains:
@@ -32,19 +37,22 @@
      - Pattern controls:
        - Pattern length control (1-128 steps)
        - Page navigation (when pattern > 16 steps)
-       - Zoom controls
+       - Zoom controls (0.5x to 2.0x)
    - Behavior:
      - Manages track layout and spacing
+     - Coordinates selection across tracks
      - Handles zoom level for all child components
+     - Provides selection state to parameter editors
 
 4. `StepControls` (sirkus::ui::StepControls)
    - Properties:
-     - Note value selector
-     - Velocity control
+     - Note value selector (0-127)
+     - Velocity control (0-127)
      - Note length selector (using NoteLength enum)
    - Behavior:
      - Updates when step selection changes
-     - Applies changes to selected step(s)
+     - Applies changes to all selected steps
+     - Shows values from first selected step
 
 5. `GlobalControls` (sirkus::ui::GlobalControls)
    - Contains:
@@ -52,6 +60,27 @@
      - Step interval selector (using StepInterval enum)
      - Pattern length control
      - Zoom controls
+
+## Selection System
+
+### Selection Modes
+1. Single Selection
+   - Left click selects single step
+   - Clears previous selection
+
+2. Multi Selection
+   - Cmd/Ctrl+click adds/removes from selection
+   - Works across tracks
+
+3. Range Selection
+   - Shift+click selects range from last selected
+   - Works within single track
+
+### Selection State Management
+- Each track maintains its selected step indices
+- PatternView coordinates selection across tracks
+- Selection changes trigger parameter control updates
+- Selected steps updated together when parameters change
 
 ## Layout Strategy
 
@@ -78,20 +107,11 @@
 +----------------------------------------+
 ```
 
-## Zoom Implementation
-
-- Zoom levels: 0.5x, 1x, 1.5x, 2x
-- Affects:
-  - Step button size
-  - Track spacing
-  - Overall component scaling
-- Maintains minimum usable sizes
-
 ## Component Communication
 
 ### Event System
-- StepButton -> StepTrack: Step state changes
-- StepTrack -> PatternView: Track state updates
+- StepButton -> StepTrack: Step state and selection changes
+- StepTrack -> PatternView: Track state and selection updates
 - GlobalControls -> PatternView: Pattern length/zoom changes
 - StepControls -> Selected steps: Parameter updates
 
@@ -99,6 +119,7 @@
 - Each track maintains its step data
 - Pattern view coordinates track states
 - Global settings stored at pattern level
+- Selection state managed hierarchically
 
 ## Styling Guidelines
 
@@ -116,43 +137,43 @@
 3. Interactive elements:
    - Clear hover states
    - Visual feedback for clicks
+   - Selection highlighting
    - Disabled state styling
 
-## Implementation Plan
+## Implementation Notes
 
-1. Phase 1: Core Components
-   - Implement StepButton
-   - Create StepTrack with basic functionality
-   - Set up PatternView structure
+1. Type Safety
+   - Careful handling of signed/unsigned conversions
+   - Explicit bounds checking for array access
+   - Safe conversions for MIDI values
 
-2. Phase 2: Controls
-   - Implement StepControls
-   - Add GlobalControls
-   - Connect control events to components
-
-3. Phase 3: Advanced Features
-   - Add zoom functionality
-   - Implement paging system
-   - Add MIDI channel selection
-
-4. Phase 4: Polish
-   - Refine styling
-   - Add animations
-   - Optimize performance
-
-## Technical Considerations
-
-1. Performance
+2. Performance
    - Use JUCE's Component::setBufferedToImage() for complex components
    - Optimize repaints during pattern playback
    - Efficient handling of large patterns
 
-2. Extensibility
+3. Extensibility
    - Component design allows for future track count increases
    - Modular control system for easy feature additions
    - Flexible styling system for theme support
 
-3. Resource Management
+4. Resource Management
    - Smart pointer usage for component ownership
    - Efficient event handling
    - Proper cleanup in destructors
+
+## Future Enhancements
+1. Keyboard Shortcuts
+   - Cmd/Ctrl+A for select all
+   - Delete/Backspace to clear steps
+   - Copy/paste for selected steps
+
+2. Visual Improvements
+   - Drag selection
+   - Better selection highlighting
+   - Animated transitions
+
+3. Additional Features
+   - Step probability editing
+   - Swing control per track
+   - Pattern storage/recall

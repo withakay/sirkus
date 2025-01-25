@@ -1,11 +1,17 @@
 #include <JuceHeader.h>
 
+#include "Constants.h"
 #include "PluginEditor.h"
 #include "Sequencer.h"
 #include "TimingManager.h"
+#include "Types.h"
+
 
 SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor &p)
     : AudioProcessorEditor(&p), processorRef(p), transportControls(p) {
+  // Apply custom look and feel
+  setLookAndFeel(&lookAndFeel);
+
   // Add and make visible all components
   addAndMakeVisible(transportControls);
   addAndMakeVisible(globalControls);
@@ -21,14 +27,17 @@ SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor &p)
   addAndMakeVisible(positionLabel);
   positionLabel.setJustificationType(juce::Justification::left);
   positionLabel.setText("Position: --", juce::dontSendNotification);
+  positionLabel.getProperties().set("isValue", true);
 
   addAndMakeVisible(bpmLabel);
   bpmLabel.setJustificationType(juce::Justification::left);
   bpmLabel.setText("BPM: --", juce::dontSendNotification);
+  bpmLabel.getProperties().set("isValue", true);
 
   addAndMakeVisible(timeSignatureLabel);
   timeSignatureLabel.setJustificationType(juce::Justification::left);
   timeSignatureLabel.setText("Time Sig: --", juce::dontSendNotification);
+  timeSignatureLabel.getProperties().set("isValue", true);
 
   // Initialize UI state from processor
   updatePatternView();
@@ -42,10 +51,11 @@ SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor &p)
 
 SirkusAudioProcessorEditor::~SirkusAudioProcessorEditor()
 {
-    stopTimer();
-    patternView.removeListener(this);
-    stepControls.removeListener(this);
-    globalControls.removeListener(this);
+  setLookAndFeel(nullptr);
+  stopTimer();
+  patternView.removeListener(this);
+  stepControls.removeListener(this);
+  globalControls.removeListener(this);
 }
 
 void SirkusAudioProcessorEditor::paint(juce::Graphics& g)
@@ -87,6 +97,7 @@ void SirkusAudioProcessorEditor::timerCallback()
 {
     updatePositionDisplay();
     updateTransportDisplay();
+    updatePlaybackPosition();
 }
 
 void SirkusAudioProcessorEditor::updatePositionDisplay()
@@ -121,6 +132,57 @@ void SirkusAudioProcessorEditor::updatePositionDisplay()
 void SirkusAudioProcessorEditor::updateTransportDisplay()
 {
   // Transport state is handled by TransportControls component
+}
+
+void SirkusAudioProcessorEditor::updatePlaybackPosition() {
+  const auto &sequencer = processorRef.getSequencer();
+  const auto &timing = sequencer.getTimingManager();
+
+  // Clear all step triggers first
+  patternView.clearAllTriggers();
+
+  // Only update if we're playing
+  if (!timing.isPlaying())
+    return;
+
+  // Get current position
+  if (const auto pos = timing.getMusicalPosition()) {
+    // For each track
+    for (size_t i = 0; i < sequencer.getTrackCount(); ++i) {
+      if (auto *track = sequencer.getTrack(static_cast<uint32_t>(i))) {
+        if (auto *pattern = track->getCurrentPattern()) {
+          // Calculate current step based on position and step interval
+          int totalTicks =
+              ((pos->bar - 1) * 4 + (pos->beat - 1)) * sirkus::PPQN +
+              static_cast<int>(pos->tick);
+
+          int stepIntervalTicks =
+              sirkus::stepIntervalToTicks(pattern->getStepInterval());
+          if (stepIntervalTicks <= 0) // Safeguard against division by zero
+            continue;
+
+          // Calculate current step, handling negative positions
+          int currentStep = totalTicks / stepIntervalTicks;
+          if (currentStep < 0)
+            currentStep =
+                static_cast<int>(pattern->getLength()) +
+                (currentStep % static_cast<int>(pattern->getLength()));
+
+          // Wrap around pattern length
+          currentStep = currentStep % static_cast<int>(pattern->getLength());
+
+          // Calculate visible step based on current page
+          int visibleStep =
+              currentStep % sirkus::ui::PatternView::STEPS_PER_PAGE;
+          if (visibleStep >= 0 &&
+              visibleStep < sirkus::ui::PatternView::STEPS_PER_PAGE) {
+            patternView.setStepTriggered(static_cast<int>(i), visibleStep,
+                                         true);
+          }
+        }
+      }
+    }
+  }
 }
 
 void SirkusAudioProcessorEditor::updatePatternView() {

@@ -8,7 +8,9 @@ set(SourceFiles
     src/ui/GlobalControls.h
     src/ui/StepTrack.h
     src/ui/PatternView.cpp
+    src/ui/SirkusLookAndFeel.cpp
     src/ui/PatternView.h
+    src/ui/SirkusLookAndFeel.h
     src/ui/StepTrack.cpp
     src/ui/GlobalControls.cpp
     src/ui/StepButton.h
