@@ -19,7 +19,7 @@ struct Step {
     
     // Helper methods to get timing information
     uint64_t getNoteLengthInTicks() const {
-        return noteLengthToTicks(noteLength.load(std::memory_order_acquire));
+        return static_cast<uint64_t>(noteLengthToTicks(noteLength.load(std::memory_order_acquire)));
     }
 };
 
