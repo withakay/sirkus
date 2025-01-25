@@ -43,16 +43,18 @@ set(FORMATS Standalone AU VST3)
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 # Downloads CPM if not already downloaded. CPM is an easy-to-use package manager nicely integrated with CMake.
-include(cmake/cpm.cmake)
+# include(cmake/cpm.cmake)
 
 # This commands downloads AND configures JUCE. It sets up some variables, like JUCE_SOURCE_DIR.
-CPMAddPackage(
-        NAME JUCE
-        GIT_TAG 8.0.4
-        VERSION 8.0.4
-        GITHUB_REPOSITORY juce-framework/JUCE
-        SOURCE_DIR ${LIB_DIR}/juce
-)
+# CPMAddPackage(
+#         NAME JUCE
+#         GIT_TAG 8.0.4
+#         VERSION 8.0.4
+#         GITHUB_REPOSITORY juce-framework/JUCE
+#         SOURCE_DIR ${LIB_DIR}/juce
+# )
+
+add_subdirectory(${LIB_DIR}/juce)
 
 # Plugin definition using juce_add_plugin
 juce_add_plugin(${PROJECT_NAME}
@@ -76,21 +78,7 @@ juce_add_plugin(${PROJECT_NAME}
 add_library(SharedCode INTERFACE)
 
 # Make sure you include any new source files here
-set(SourceFiles
-        src/Constants.h
-        src/InternalTransport.cpp
-        src/InternalTransport.h
-        src/PluginEditor.cpp
-        src/PluginEditor.h
-        src/PluginProcessor.cpp
-        src/PluginProcessor.h
-        src/TimingInfo.cpp
-        src/TimingInfo.h
-        src/TimingManager.cpp
-        src/TimingManager.h
-        src/Track.cpp
-        src/Track.h
-)
+include(SourceFiles.cmake)
 
 # Make the SourceFiles buildable
 target_sources(SharedCode INTERFACE ${SourceFiles})
@@ -103,7 +91,7 @@ target_compile_definitions(SharedCode
 
         JUCE_WEB_BROWSER=0                     # Disabling web browser unless needed
         JUCE_USE_CURL=0                        # Disabling curl unless needed
-        JUCE_VST3_CAN_REPLACE_VST2=0          # Matches .jucer file JUCE_VST3_CAN_REPLACE_VST2
+        JUCE_VST3_CAN_REPLACE_VST2=0           # Matches .jucer file JUCE_VST3_CAN_REPLACE_VST2
 
         # lets the app known if we're Debug or Release
         CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
@@ -133,7 +121,7 @@ target_link_libraries(SharedCode
 # Link the JUCE plugin targets our SharedCode target
 target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 
-include_directories(${CMAKE_BINARY_DIR}/${PROJECT_NAME}_artefacts/JuceLibraryCode)
+# include_directories(${CMAKE_BINARY_DIR}/${PROJECT_NAME}_artefacts/JuceLibraryCode)
 
 include(cmake/shared-code-defaults.cmake)
 include(cmake/sanitizers.cmake)

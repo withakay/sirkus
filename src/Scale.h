@@ -42,13 +42,13 @@ public:
     static constexpr std::array<uint8_t, 12> CHROMATIC = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     
     Scale();
-    explicit Scale(Type type, uint8_t root = 0);
-    Scale(const std::vector<uint8_t>& degrees, uint8_t root = 0);
+    explicit Scale(Type scaleType, uint8_t rootNote = 0);
+    Scale(const std::vector<uint8_t>& scaleNotes, uint8_t rootNote = 0);
     
     // Scale manipulation
-    void setType(Type type);
-    void setRoot(uint8_t root);
-    void setCustomDegrees(const std::vector<uint8_t>& degrees);
+    void setType(Type newType);
+    void setRoot(uint8_t newRoot);
+    void setCustomDegrees(const std::vector<uint8_t>& newDegrees);
     
     // Scale info
     Type getType() const { return type; }

@@ -42,7 +42,7 @@ public:
     
 private:
     uint32_t generateTrackId();
-    void updateTrackSwing();
+    void updateTrackSwing() const;
     void updateTrackScale();
     
     TimingManager timingManager;

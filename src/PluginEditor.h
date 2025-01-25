@@ -1,13 +1,16 @@
 #pragma once
 
-#include "PluginProcessor.h"
-
 #include <JuceHeader.h>
+
+#include "PluginProcessor.h"
+#include "ui/TransportControls.h"
+
+namespace sirkus {
 
 class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
-    explicit SirkusAudioProcessorEditor(SirkusAudioProcessor&);
+    explicit SirkusAudioProcessorEditor(sirkus::SirkusAudioProcessor&);
     ~SirkusAudioProcessorEditor() override;
 
     void paint(juce::Graphics&) override;
@@ -15,10 +18,9 @@ public:
     void timerCallback() override;
 
 private:
-    SirkusAudioProcessor& processorRef;
+    sirkus::SirkusAudioProcessor& processorRef;
 
-    juce::TextButton playButton{"Play"};
-    juce::ToggleButton hostSyncButton{"Sync to Host"};
+    ui::TransportControls transportControls;
     juce::Label positionLabel;
     juce::Label bpmLabel;
     juce::Label timeSignatureLabel;
@@ -28,3 +30,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessorEditor)
 };
+
+} // namespace sirkus

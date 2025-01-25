@@ -21,6 +21,26 @@ Sirkus is a JUCE-based step sequencer plugin and standalone app with sophisticat
   - No underscores in names unless necessary for readability
   - Namespaces: lowercase (e.g., sirkus)
 
+- Integer Type Usage:
+  - Use size_t for:
+    - Array indices (e.g., stepIndex)
+    - Container sizes (e.g., pattern length)
+    - Any index into std:: containers
+    - Rationale: size_t is specifically for memory sizes/offsets per C spec
+  - Use int for:
+    - Tick values and positions
+    - Musical timing calculations
+    - Grid positions and intervals
+    - Note lengths in ticks
+    - Values that may be negative (offsets)
+    - Rationale: Musical timing can be negative, ~2M ticks fit in int range
+  - Use uint32_t for:
+    - Track IDs and other identifiers
+    - Rationale: IDs are always positive, uint32_t range is sufficient
+  - Use uint8_t for:
+    - MIDI values (notes: 0-127, velocity: 0-127)
+    - Rationale: Naturally constrains to MIDI value range
+
 ### Key Components
 1. **Sequencer**
    - Central orchestrator of the plugin

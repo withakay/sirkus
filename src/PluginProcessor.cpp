@@ -1,13 +1,7 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
-
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+
+namespace sirkus {
 
 SirkusAudioProcessor::SirkusAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -28,6 +22,7 @@ SirkusAudioProcessor::~SirkusAudioProcessor() = default;
 
 void SirkusAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+    SIRKUS_UNUSED(samplesPerBlock);
     sequencer.prepare(sampleRate);
 }
 
@@ -41,7 +36,10 @@ void SirkusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     const auto numSamples = buffer.getNumSamples();
     
     midiMessages.clear();
-    sequencer.processBlock(getPlayHead(), numSamples, midiMessages);
+    auto* playHead = getPlayHead();
+    if (playHead != nullptr) {
+        sequencer.processBlock(playHead, numSamples, midiMessages);
+    }
 }
 
 const juce::String SirkusAudioProcessor::getName() const
@@ -170,7 +168,7 @@ bool SirkusAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SirkusAudioProcessor::createEditor()
 {
-    return new SirkusAudioProcessorEditor(*this);
+    return new sirkus::SirkusAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -191,9 +189,11 @@ void SirkusAudioProcessor::setStateInformation(const void* data, int sizeInBytes
     SIRKUS_UNUSED(sizeInBytes);
 }
 
+} // namespace sirkus
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new SirkusAudioProcessor();
+    return new sirkus::SirkusAudioProcessor();
 }

@@ -1,72 +1,116 @@
 {
-    "version": 6,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 30,
-        "patch": 0
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 30,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "displayName": "Default Configuration",
+      "description": "Default build using Ninja generator",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     },
-    "configurePresets": [
-        {
-            "name": "default",
-            "hidden": true,
-            "displayName": "Default Configuration",
-            "description": "Default build using Ninja generator",
-            "binaryDir": "${sourceDir}/build/${presetName}",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "ninja-debug",
-            "inherits": "default",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "ninja-release",
-            "inherits": "default",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "ninja-multi",
-            "inherits": "default",
-            "displayName": "Ninja Multi-Config",
-            "description": "Default build using Ninja Multi-Config generator",
-            "generator": "Ninja Multi-Config"
-        }
-    ],
-    "buildPresets": [
-        {
-            "name": "ninja-debug-vst3",
-            "displayName": "VST3 Debug",
-            "configurePreset": "ninja-debug",
-            "configuration": "Debug",
-            "targets": [
-                "Sirkus_VST3"
-            ]
-        },
-        {
-            "name": "ninja-release-vst3",
-            "displayName": "VST3 Release",
-            "configurePreset": "ninja-release",
-            "configuration": "Release",
-            "targets": [
-                "Sirkus_VST3"
-            ]
-        },
-        {
-            "name": "ninja-multi-vst3",
-            "displayName": "VST3 Multi-Config",
-            "configurePreset": "ninja-multi",
-            "targets": [
-                "Sirkus_VST3"
-            ]
-        }
-    ]
+    {
+      "name": "ninja-debug",
+      "inherits": "default",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "ninja-release",
+      "inherits": "default",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ninja-multi",
+      "inherits": "default",
+      "displayName": "Ninja Multi-Config",
+      "description": "Default build using Ninja Multi-Config generator",
+      "generator": "Ninja Multi-Config"
+    },
+    {
+      "name": "xcode-debug",
+      "inherits": "default",
+      "generator": "Xcode",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "xcode-release",
+      "inherits": "default",
+      "generator": "Xcode",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ninja-debug-vst3",
+      "displayName": "VST3 Debug",
+      "configurePreset": "ninja-debug",
+      "configuration": "Debug",
+      "targets": [
+        "Sirkus_VST3"
+      ]
+    },
+    {
+      "name": "ninja-release-vst3",
+      "displayName": "VST3 Release",
+      "configurePreset": "ninja-release",
+      "configuration": "Release",
+      "targets": [
+        "Sirkus_VST3"
+      ]
+    },
+    {
+      "name": "ninja-debug-au",
+      "displayName": "AU Debug",
+      "configurePreset": "ninja-debug",
+      "configuration": "Debug",
+      "targets": [
+        "Sirkus_AU"
+      ]
+    },
+    {
+      "name": "ninja-release-au",
+      "displayName": "AU Release",
+      "configurePreset": "ninja-release",
+      "configuration": "Release",
+      "targets": [
+        "Sirkus_AU"
+      ]
+    },
+    {
+      "name": "ninja-debug-standalone",
+      "displayName": "Standalone Debug",
+      "configurePreset": "ninja-debug",
+      "configuration": "Debug",
+      "targets": [
+        "Sirkus_Standalone"
+      ]
+    },
+    {
+      "name": "ninja-release-standalone",
+      "displayName": "Standalone Release",
+      "configurePreset": "ninja-release",
+      "configuration": "Release",
+      "targets": [
+        "Sirkus_Standalone"
+      ]
+    }
+  ]
 }

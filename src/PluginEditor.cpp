@@ -1,31 +1,17 @@
-#include "PluginEditor.h"
+#include <JuceHeader.h>
 
-#include "PluginProcessor.h"
+#include "PluginEditor.h"
+#include "Sequencer.h"
+#include "TimingManager.h"
+
+namespace sirkus {
 
 SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor& p)
-        : AudioProcessorEditor(&p)
-        , processorRef(p)
+    : AudioProcessorEditor(&p)
+    , processorRef(p)
+    , transportControls(p)
 {
-    // Play button setup
-    addAndMakeVisible(playButton);
-    playButton.setClickingTogglesState(true);
-    playButton.onClick = [this]() {
-        if (playButton.getToggleState())
-        {
-            processorRef.getTimingManager().start();
-            playButton.setButtonText("Stop");
-        }
-        else
-        {
-            processorRef.getTimingManager().stop();
-            playButton.setButtonText("Play");
-        }
-    };
-
-    // Host sync button setup
-    addAndMakeVisible(hostSyncButton);
-    hostSyncButton.setToggleState(processorRef.isHostSyncEnabled(), juce::dontSendNotification);
-    hostSyncButton.onClick = [this]() { processorRef.setHostSyncEnabled(hostSyncButton.getToggleState()); };
+    addAndMakeVisible(transportControls);
 
     // Labels setup
     addAndMakeVisible(positionLabel);
@@ -62,10 +48,7 @@ void SirkusAudioProcessorEditor::resized()
     auto area = getLocalBounds().reduced(10);
 
     // Layout controls vertically
-    playButton.setBounds(area.removeFromTop(30));
-    area.removeFromTop(10); // spacing
-
-    hostSyncButton.setBounds(area.removeFromTop(30));
+    transportControls.setBounds(area.removeFromTop(70));
     area.removeFromTop(10); // spacing
 
     positionLabel.setBounds(area.removeFromTop(25));
@@ -85,7 +68,8 @@ void SirkusAudioProcessorEditor::timerCallback()
 
 void SirkusAudioProcessorEditor::updatePositionDisplay()
 {
-    const auto& timing = processorRef.getTimingManager();
+    const auto& sequencer = processorRef.getSequencer();
+    const auto& timing = sequencer.getTimingManager();
 
     if (const auto pos = timing.getMusicalPosition())
     {
@@ -113,16 +97,7 @@ void SirkusAudioProcessorEditor::updatePositionDisplay()
 
 void SirkusAudioProcessorEditor::updateTransportDisplay()
 {
-    if (const bool isPlaying = processorRef.getTimingManager().isPlaying(); playButton.getToggleState() != isPlaying)
-    {
-        playButton.setToggleState(isPlaying, juce::dontSendNotification);
-        playButton.setButtonText(isPlaying ? "Stop" : "Play");
-    }
-
-    // Update host sync button state
-    const bool syncEnabled = processorRef.isHostSyncEnabled();
-    if (hostSyncButton.getToggleState() != syncEnabled)
-    {
-        hostSyncButton.setToggleState(syncEnabled, juce::dontSendNotification);
-    }
+    // Transport state is now handled by TransportControls component
 }
+
+} // namespace sirkus

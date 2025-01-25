@@ -7,45 +7,45 @@ namespace sirkus {
 Scale::Scale() : degrees(MAJOR_SCALE.begin(), MAJOR_SCALE.end()) {
 }
 
-Scale::Scale(Type type, uint8_t root) : type(type), root(root % 12) {
+Scale::Scale(Type scaleType, uint8_t rootNote) : type(scaleType), root(rootNote % 12) {
     updateDegrees();
 }
 
-Scale::Scale(const std::vector<uint8_t>& degrees, uint8_t root) 
-    : type(Type::Custom), root(root % 12), degrees(degrees) {
+Scale::Scale(const std::vector<uint8_t>& scaleNotes, uint8_t rootNote)
+    : type(Type::Custom), root(rootNote % 12), degrees(scaleNotes) {
     // Ensure degrees are sorted and unique
-    std::sort(this->degrees.begin(), this->degrees.end());
-    auto last = std::unique(this->degrees.begin(), this->degrees.end());
-    this->degrees.erase(last, this->degrees.end());
+    std::sort(degrees.begin(), degrees.end());
+    auto last = std::unique(degrees.begin(), degrees.end());
+    degrees.erase(last, degrees.end());
     
     // Ensure all degrees are within 0-11
-    for (auto& degree : this->degrees) {
-        degree %= 12;
+    for (auto& note : degrees) {
+        note %= 12;
     }
 }
 
-void Scale::setType(Type type) {
-    this->type = type;
+void Scale::setType(Type newType) {
+    type = newType;
     updateDegrees();
 }
 
-void Scale::setRoot(uint8_t root) {
-    this->root = root % 12;
+void Scale::setRoot(uint8_t newRoot) {
+    root = newRoot % 12;
     updateDegrees();
 }
 
-void Scale::setCustomDegrees(const std::vector<uint8_t>& degrees) {
+void Scale::setCustomDegrees(const std::vector<uint8_t>& newDegrees) {
     type = Type::Custom;
-    this->degrees = degrees;
+    degrees = newDegrees;
     
     // Ensure degrees are sorted and unique
-    std::sort(this->degrees.begin(), this->degrees.end());
-    auto last = std::unique(this->degrees.begin(), this->degrees.end());
-    this->degrees.erase(last, this->degrees.end());
+    std::sort(degrees.begin(), degrees.end());
+    auto last = std::unique(degrees.begin(), degrees.end());
+    degrees.erase(last, degrees.end());
     
     // Ensure all degrees are within 0-11
-    for (auto& degree : this->degrees) {
-        degree %= 12;
+    for (auto& note : degrees) {
+        note %= 12;
     }
 }
 

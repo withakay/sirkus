@@ -1,10 +1,14 @@
 #include "Track.h"
 #include "Step.h"
+#include "Scale.h"
+#include "Pattern.h"
+
 #include <algorithm>
+#include <cstdint>
 
 namespace sirkus {
 
-Track::Track(uint32_t id) : trackId(id), currentPattern(std::make_unique<Pattern>())
+Track::Track(const uint32_t id) : trackId(id), currentPattern(std::make_unique<Pattern>())
 {
 }
 
@@ -40,9 +44,9 @@ uint8_t Track::quantizeNote(uint8_t note) const
     }
 }
 
-std::vector<std::pair<uint64_t, const Step*>> Track::getActiveSteps(uint64_t startTick, uint64_t numTicks) const
+std::vector<std::pair<int, const Step*>> Track::getActiveSteps(int startTick, int numTicks) const
 {
-    std::vector<std::pair<uint64_t, const Step*>> activeSteps;
+    std::vector<std::pair<int, const Step*>> activeSteps;
     if (!currentPattern)
         return activeSteps;
 
@@ -54,7 +58,7 @@ std::vector<std::pair<uint64_t, const Step*>> Track::getActiveSteps(uint64_t sta
     // Collect all triggers within this block
     while (it != triggers.end() && it->first < startTick + numTicks)
     {
-        const uint32_t stepIndex = it->second;
+        const auto stepIndex = it->second;
         const auto& step = currentPattern->getStep(stepIndex);
 
         // Only include enabled steps that pass probability check
