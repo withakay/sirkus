@@ -8,13 +8,13 @@ namespace sirkus::ui {
 class TransportControls : public juce::Component
 {
 public:
-    explicit TransportControls(sirkus::SirkusAudioProcessor&);
+    explicit TransportControls(SirkusAudioProcessor&);
     ~TransportControls() override = default;
 
     void resized() override;
 
 private:
-    sirkus::SirkusAudioProcessor& processorRef;
+    SirkusAudioProcessor& processorRef;
 
     juce::TextButton playButton{"Play"};
     juce::ToggleButton hostSyncButton{"Sync to Host"};

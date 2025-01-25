@@ -2,7 +2,7 @@
 
 namespace sirkus::ui {
 
-TransportControls::TransportControls(sirkus::SirkusAudioProcessor& p)
+TransportControls::TransportControls(SirkusAudioProcessor& p)
     : processorRef(p)
 {
     // Play button setup

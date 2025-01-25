@@ -14,7 +14,6 @@
 //==============================================================================
 /**
  */
-namespace sirkus {
 
 class SirkusAudioProcessor : public juce::AudioProcessor
 {
@@ -27,9 +26,9 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-#ifndef JucePlugin_PreferredChannelConfigurations
+    #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
-#endif
+    #endif
 
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
@@ -62,20 +61,18 @@ public:
     void stopStandalonePlayback();
     bool isStandalonePlaying() const;
     bool isInStandaloneMode() const;
+    bool isHostSyncEnabled() const;
 
     // Host sync control
-    void setHostSyncEnabled(bool enabled) { sequencer.getTimingManager().setHostSyncEnabled(enabled); }
-    [[nodiscard]] bool isHostSyncEnabled() const { return sequencer.getTimingManager().isHostSyncEnabled(); }
+    void setHostSyncEnabled(const bool enabled);
 
     // Direct access to sequencer
-    sirkus::Sequencer& getSequencer() { return sequencer; }
-    const sirkus::Sequencer& getSequencer() const { return sequencer; }
+    sirkus::Sequencer& getSequencer();
 
 private:
-    sirkus::Sequencer sequencer;
+    sirkus::Sequencer sequencer = sirkus::Sequencer();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessor)
 };
 
-} // namespace sirkus

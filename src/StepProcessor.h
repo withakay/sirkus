@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Scale.h"
 #include "Types.h"
 #include <JuceHeader.h>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace sirkus {
 
@@ -17,22 +18,25 @@ public:
     StepProcessor();
     ~StepProcessor();
 
-    // Track registration
-    void addTrack(Track* track);
-    void removeTrack(Track* track);
-
-    // Process all tracks and generate MIDI output
-    void processBlock(int startTick, int numTicks, juce::MidiBuffer& midiOut);
-
-    // Future: Modulation processing
-    // void processModulations();
-    // void addModulationRoute(uint32_t sourceTrack, uint32_t targetTrack, ModulationType type);
+    // Process steps and generate MIDI output
+    void processSteps(
+        const std::vector<std::pair<int, const Step*>>& steps,
+        const TrackInfo& trackInfo,
+        const Scale& scale,
+        int startTick,
+        int numTicks,
+        juce::MidiBuffer& midiOut);
 
 private:
-    std::vector<Track*> tracks;
-
     // Helper methods
-    void processStep(const Step& step, int triggerTick, int startTick, int numTicks, juce::MidiBuffer& midiOut);
+    static void processStep(
+        const Step& step,
+        const TrackInfo& trackInfo,
+        const Scale& scale,
+        int triggerTick,
+        int startTick,
+        int numTicks,
+        juce::MidiBuffer& midiOut);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StepProcessor)
 };

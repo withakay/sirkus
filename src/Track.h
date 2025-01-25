@@ -1,12 +1,11 @@
 #pragma once
 
-#include <JuceHeader.h>
 #include "Pattern.h"
-#include "Scale.h"
 #include "Types.h"
+#include <JuceHeader.h>
+#include <atomic>
 #include <memory>
 #include <vector>
-#include <atomic>
 
 namespace sirkus {
 
@@ -24,16 +23,14 @@ public:
     uint8_t getMidiChannel() const { return midiChannel.load(std::memory_order_acquire); }
     void setMidiChannel(uint8_t channel) { midiChannel.store(channel, std::memory_order_release); }
 
-    // Scale settings
+    // Scale mode settings
     void setScaleMode(ScaleMode mode) { scaleMode.store(mode, std::memory_order_release); }
     ScaleMode getScaleMode() const { return scaleMode.load(std::memory_order_acquire); }
 
-    void setScale(Scale::Type type, uint8_t root = 0);
-    void setCustomScale(const std::vector<uint8_t>& degrees, uint8_t root = 0);
-    const Scale& getScale() const { return scale; }
-
-    // Note quantization
-    uint8_t quantizeNote(uint8_t note) const;
+    // Get track information needed for step processing
+    TrackInfo getTrackInfo() const {
+      return TrackInfo{trackId, getMidiChannel(), getScaleMode()};
+    }
 
     // Get active steps for the current tick range
     std::vector<std::pair<int, const Step*>> getActiveSteps(int startTick, int numTicks) const;
@@ -44,7 +41,6 @@ private:
 
     std::atomic<uint8_t> midiChannel{1};
     std::atomic<ScaleMode> scaleMode{ScaleMode::Off};
-    Scale scale;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Track)
 };

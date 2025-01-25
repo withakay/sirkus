@@ -5,12 +5,10 @@
 #include "PluginProcessor.h"
 #include "ui/TransportControls.h"
 
-namespace sirkus {
-
 class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
-    explicit SirkusAudioProcessorEditor(sirkus::SirkusAudioProcessor&);
+    explicit SirkusAudioProcessorEditor(SirkusAudioProcessor&);
     ~SirkusAudioProcessorEditor() override;
 
     void paint(juce::Graphics&) override;
@@ -18,9 +16,9 @@ public:
     void timerCallback() override;
 
 private:
-    sirkus::SirkusAudioProcessor& processorRef;
+    SirkusAudioProcessor& processorRef;
 
-    ui::TransportControls transportControls;
+    sirkus::ui::TransportControls transportControls;
     juce::Label positionLabel;
     juce::Label bpmLabel;
     juce::Label timeSignatureLabel;
@@ -31,4 +29,3 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessorEditor)
 };
 
-} // namespace sirkus

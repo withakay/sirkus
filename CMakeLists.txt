@@ -121,7 +121,7 @@ target_link_libraries(SharedCode
 # Link the JUCE plugin targets our SharedCode target
 target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 
-# include_directories(${CMAKE_BINARY_DIR}/${PROJECT_NAME}_artefacts/JuceLibraryCode)
+include_directories(${CMAKE_BINARY_DIR}/${PROJECT_NAME}_artefacts/JuceLibraryCode)
 
 include(cmake/shared-code-defaults.cmake)
 include(cmake/sanitizers.cmake)

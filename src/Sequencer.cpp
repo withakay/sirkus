@@ -13,52 +13,38 @@ Sequencer::Sequencer()
 
 Track* Sequencer::addTrack()
 {
-    if (activeTrackCount >= MAX_TRACKS)
-    {
-        return nullptr;
-    }
+  if (tracks.size() >= MAX_TRACKS) {
+    return nullptr;
+  }
 
     const uint32_t trackId = generateTrackId();
     auto track = std::make_unique<Track>(trackId);
 
-    // Apply global parameters
-    track->setScale(globalScaleType, globalScaleRoot);
-    track->getCurrentPattern()->setSwingAmount(globalSwing.load());
+    // Apply global swing to pattern
+    Pattern *pattern = track->getCurrentPattern();
+    pattern->setSwingAmount(globalSwing);
 
-    // Store track in next available slot
-    tracks[activeTrackCount] = std::move(track);
-    stepProcessor.addTrack(tracks[activeTrackCount].get());
-
-    ++activeTrackCount;
-    return tracks[activeTrackCount - 1].get();
+    // Store track and get raw pointer before moving
+    auto *rawTrack = track.get();
+    tracks.push_back(std::move(track));
+    return rawTrack;
 }
 
 bool Sequencer::removeTrack(uint32_t trackId)
 {
     // Can't remove the last track
-    if (activeTrackCount <= 1)
-    {
-        return false;
+    if (tracks.size() <= 1) {
+      return false;
     }
 
     // Find track with matching ID
-    for (size_t i = 0; i < activeTrackCount; ++i)
-    {
-        if (tracks[i]->getId() == trackId)
-        {
-            // Remove from step processor
-            stepProcessor.removeTrack(tracks[i].get());
+    auto it = std::find_if(
+        tracks.begin(), tracks.end(),
+        [trackId](const auto &track) { return track->getId() == trackId; });
 
-            // Shift remaining tracks down
-            for (size_t j = i; j < activeTrackCount - 1; ++j)
-            {
-                tracks[j] = std::move(tracks[j + 1]);
-            }
-            tracks[activeTrackCount - 1].reset();
-
-            --activeTrackCount;
-            return true;
-        }
+    if (it != tracks.end()) {
+      tracks.erase(it);
+      return true;
     }
 
     return false;
@@ -66,26 +52,20 @@ bool Sequencer::removeTrack(uint32_t trackId)
 
 Track* Sequencer::getTrack(uint32_t trackId)
 {
-    for (size_t i = 0; i < activeTrackCount; ++i)
-    {
-        if (tracks[i]->getId() == trackId)
-        {
-            return tracks[i].get();
-        }
-    }
-    return nullptr;
+  auto it =
+      std::find_if(tracks.begin(), tracks.end(), [trackId](const auto &track) {
+        return track->getId() == trackId;
+      });
+  return it != tracks.end() ? it->get() : nullptr;
 }
 
 const Track* Sequencer::getTrack(uint32_t trackId) const
 {
-    for (size_t i = 0; i < activeTrackCount; ++i)
-    {
-        if (tracks[i]->getId() == trackId)
-        {
-            return tracks[i].get();
-        }
-    }
-    return nullptr;
+  auto it =
+      std::find_if(tracks.begin(), tracks.end(), [trackId](const auto &track) {
+        return track->getId() == trackId;
+      });
+  return it != tracks.end() ? it->get() : nullptr;
 }
 
 void Sequencer::prepare(double sampleRate)
@@ -113,20 +93,24 @@ void Sequencer::processBlock(juce::AudioPlayHead* playHead, int numSamples, juce
     const int startTick = static_cast<int>(*ppqPos * PPQN);
     const int numTicks = static_cast<int>(numSamples * samplesToTicks);
 
-    stepProcessor.processBlock(startTick, numTicks, midiOut);
+    // Process each track's steps
+    for (const auto &track : tracks) {
+      auto activeSteps = track->getActiveSteps(startTick, numTicks);
+      stepProcessor.processSteps(activeSteps, track->getTrackInfo(),
+                                 globalScale, startTick, numTicks, midiOut);
+    }
 }
 
-void Sequencer::setGlobalSwing(float amount)
-{
-    globalSwing.store(amount, std::memory_order_release);
-    updateTrackSwing();
+void Sequencer::setGlobalSwing(const float amount) {
+  globalSwing = amount;
+  updateTrackSwing();
 }
 
 void Sequencer::setGlobalScale(Scale::Type type, uint8_t root)
 {
     globalScaleType = type;
     globalScaleRoot = root % 12;
-    updateTrackScale();
+    globalScale = Scale(type, root);
 }
 
 void Sequencer::setGlobalCustomScale(const std::vector<uint8_t>& degrees, uint8_t root)
@@ -134,7 +118,7 @@ void Sequencer::setGlobalCustomScale(const std::vector<uint8_t>& degrees, uint8_
     globalScaleType = Scale::Type::Custom;
     globalScaleRoot = root % 12;
     globalCustomDegrees = degrees;
-    updateTrackScale();
+    globalScale = Scale(degrees, root);
 }
 
 uint32_t Sequencer::generateTrackId()
@@ -144,29 +128,12 @@ uint32_t Sequencer::generateTrackId()
 
 void Sequencer::updateTrackSwing() const
 {
-    const float amount = globalSwing.load(std::memory_order_acquire);
-    for (size_t i = 0; i < activeTrackCount; ++i)
-    {
-        if (auto* pattern = tracks[i]->getCurrentPattern())
-        {
-            pattern->setSwingAmount(amount);
-        }
+  const float amount = globalSwing;
+  for (const auto &track : tracks) {
+    if (auto *pattern = track->getCurrentPattern()) {
+      pattern->setSwingAmount(amount);
     }
-}
-
-void Sequencer::updateTrackScale()
-{
-    for (size_t i = 0; i < activeTrackCount; ++i)
-    {
-        if (globalScaleType == Scale::Type::Custom)
-        {
-            tracks[i]->setCustomScale(globalCustomDegrees, globalScaleRoot);
-        }
-        else
-        {
-            tracks[i]->setScale(globalScaleType, globalScaleRoot);
-        }
-    }
+  }
 }
 
 } // namespace sirkus

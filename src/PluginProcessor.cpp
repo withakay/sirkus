@@ -1,7 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
-namespace sirkus {
+#include "Constants.h"
 
 SirkusAudioProcessor::SirkusAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -30,14 +29,25 @@ void SirkusAudioProcessor::releaseResources()
 {
 }
 
+void SirkusAudioProcessor::setHostSyncEnabled(const bool enabled)
+{
+    sequencer.getTimingManager().setHostSyncEnabled(enabled);
+}
+
+[[nodiscard]] bool SirkusAudioProcessor::isHostSyncEnabled() const
+{
+    return sequencer.getTimingManager().isHostSyncEnabled();
+}
+
 void SirkusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     const auto numSamples = buffer.getNumSamples();
-    
+
     midiMessages.clear();
     auto* playHead = getPlayHead();
-    if (playHead != nullptr) {
+    if (playHead != nullptr)
+    {
         sequencer.processBlock(playHead, numSamples, midiMessages);
     }
 }
@@ -134,6 +144,11 @@ bool SirkusAudioProcessor::isInStandaloneMode() const
     return sequencer.getTimingManager().isStandaloneMode();
 }
 
+sirkus::Sequencer& SirkusAudioProcessor::getSequencer()
+{
+    return sequencer;
+}
+
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool SirkusAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
@@ -168,7 +183,7 @@ bool SirkusAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SirkusAudioProcessor::createEditor()
 {
-    return new sirkus::SirkusAudioProcessorEditor(*this);
+    return new SirkusAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -189,11 +204,8 @@ void SirkusAudioProcessor::setStateInformation(const void* data, int sizeInBytes
     SIRKUS_UNUSED(sizeInBytes);
 }
 
-} // namespace sirkus
 
-//==============================================================================
-// This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new sirkus::SirkusAudioProcessor();
+    return new SirkusAudioProcessor();
 }

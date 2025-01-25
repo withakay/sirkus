@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Scale.h"
 #include <cstdint>
 
 namespace sirkus {
@@ -12,6 +13,13 @@ enum class ScaleMode {
     QuantizeDown,
     QuantizeRandom
 };
+
+// Track information needed for step processing
+struct TrackInfo {
+  uint32_t id;
+  uint8_t midiChannel;
+  ScaleMode scaleMode;
+} __attribute__((aligned(16)));
 
 // Step interval options (grid spacing)
 enum class StepInterval {

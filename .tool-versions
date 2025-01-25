@@ -7,4 +7,4 @@
 # the IMO has better tooling for CMake than VSCode. The Nova (AKA Resharper)
 # feature are also far superior to the C++ tools in VSCode (or Xcode).
 #
-cmake 3.31.3
+cmake 3.30.5

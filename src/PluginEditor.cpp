@@ -4,12 +4,10 @@
 #include "Sequencer.h"
 #include "TimingManager.h"
 
-namespace sirkus {
-
 SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor& p)
     : AudioProcessorEditor(&p)
-    , processorRef(p)
-    , transportControls(p)
+      , processorRef(p)
+      , transportControls(p)
 {
     addAndMakeVisible(transportControls);
 
@@ -27,7 +25,7 @@ SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor& p)
     timeSignatureLabel.setText("Time Sig: --", juce::dontSendNotification);
 
     // Size setup
-    setSize(400, 200);
+    setSize(900, 500);
 
     // Start timer for updates
     startTimerHz(30); // 30 fps update rate
@@ -99,5 +97,3 @@ void SirkusAudioProcessorEditor::updateTransportDisplay()
 {
     // Transport state is now handled by TransportControls component
 }
-
-} // namespace sirkus

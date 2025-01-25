@@ -73,7 +73,8 @@ private:
     mutable std::mutex updateMutex;
     
     // Internal helpers
-    void updateStepTiming(size_t stepIndex);
+    void updateStepTiming(size_t stepIndex, bool acquireLock = false);  // Set acquireLock=true if no lock is held
+    void initializeStepTiming(size_t stepIndex);  // Lock-free initialization
     int calculateStepTick(size_t stepIndex) const;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Pattern)
