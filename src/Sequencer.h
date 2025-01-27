@@ -9,22 +9,34 @@
 #include <memory>
 #include <vector>
 
-namespace sirkus {
+namespace Sirkus {
 
-class Sequencer {
+class Sequencer
+{
 public:
     Sequencer();
 
     // Track Management
-    Track *addTrack();                  // Returns nullptr if at MAX_TRACKS
+    Track* addTrack();                  // Returns nullptr if at MAX_TRACKS
     bool removeTrack(uint32_t trackId); // Can't remove last track
     Track* getTrack(uint32_t trackId);
     const Track* getTrack(uint32_t trackId) const;
-    size_t getTrackCount() const { return tracks.size(); }
+
+    size_t getTrackCount() const
+    {
+        return tracks.size();
+    }
 
     // Timing Control
-    TimingManager& getTimingManager() { return timingManager; }
-    const TimingManager& getTimingManager() const { return timingManager; }
+    TimingManager& getTimingManager()
+    {
+        return timingManager;
+    }
+
+    const TimingManager& getTimingManager() const
+    {
+        return timingManager;
+    }
 
     // Audio Processing
     void prepare(double sampleRate);
@@ -32,13 +44,29 @@ public:
 
     // Global Parameters
     void setGlobalSwing(float amount);
-    float getGlobalSwing() const { return globalSwing; }
+
+    float getGlobalSwing() const
+    {
+        return globalSwing;
+    }
 
     void setGlobalScale(Scale::Type type, uint8_t root);
     void setGlobalCustomScale(const std::vector<uint8_t>& degrees, uint8_t root);
-    Scale::Type getGlobalScaleType() const { return globalScaleType; }
-    uint8_t getGlobalScaleRoot() const { return globalScaleRoot; }
-    const std::vector<uint8_t>& getGlobalCustomDegrees() const { return globalCustomDegrees; }
+
+    Scale::Type getGlobalScaleType() const
+    {
+        return globalScaleType;
+    }
+
+    uint8_t getGlobalScaleRoot() const
+    {
+        return globalScaleRoot;
+    }
+
+    const std::vector<uint8_t>& getGlobalCustomDegrees() const
+    {
+        return globalCustomDegrees;
+    }
 
 private:
     uint32_t generateTrackId();
@@ -60,4 +88,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sequencer)
 };
 
-} // namespace sirkus
+} // namespace Sirkus

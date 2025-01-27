@@ -1,9 +1,9 @@
 #include "TimingManager.h"
 
-namespace sirkus {
+namespace Sirkus {
 TimingManager::TimingManager()
-        : standaloneMode(false)
-        , hostSyncEnabled(true)
+    : standaloneMode(false)
+      , hostSyncEnabled(true)
 {
 }
 
@@ -52,4 +52,4 @@ std::optional<std::pair<int, int>> TimingManager::getTimeSignature() const
 {
     return currentTiming.timeSignature;
 }
-} // namespace sirkus
+} // namespace Sirkus

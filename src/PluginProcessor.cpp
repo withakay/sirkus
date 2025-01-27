@@ -144,7 +144,7 @@ bool SirkusAudioProcessor::isInStandaloneMode() const
     return sequencer.getTimingManager().isStandaloneMode();
 }
 
-sirkus::Sequencer& SirkusAudioProcessor::getSequencer()
+Sirkus::Sequencer& SirkusAudioProcessor::getSequencer()
 {
     return sequencer;
 }

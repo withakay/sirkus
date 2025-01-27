@@ -3,7 +3,7 @@
 #include "../Types.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 
-namespace sirkus::ui {
+namespace Sirkus::UI {
 
 /**
  * @class GlobalControls
@@ -80,4 +80,4 @@ private:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GlobalControls)
 };
 
-} // namespace sirkus::ui
+} // namespace Sirkus::UI

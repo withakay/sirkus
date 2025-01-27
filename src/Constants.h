@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace sirkus {
+namespace Sirkus {
 
 // Timing constants
 static constexpr int PPQN = 960;          // Pulses Per Quarter Note
@@ -36,4 +36,4 @@ static constexpr int NOTE_SIXTEEN_BARS = PPQN * 64; // 61440 ticks
 // Macro for suppressing unused parameter warnings
 #define SIRKUS_UNUSED(x) (void)x
 
-} // namespace sirkus
+} // namespace Sirkus

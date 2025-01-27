@@ -77,7 +77,7 @@ PackConstructorInitializers: Never
 # Line Breaks and Wrapping
 ColumnLimit: 120
 AllowShortBlocksOnASingleLine: Never
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortLambdasOnASingleLine: All

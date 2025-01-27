@@ -1,6 +1,6 @@
 #include "GlobalControls.h"
 
-namespace sirkus::ui {
+namespace Sirkus::UI {
 
 GlobalControls::GlobalControls() {
   setupTimeSignatureControls();
@@ -151,4 +151,4 @@ void GlobalControls::removeListener(Listener *listener) {
   listeners.remove(listener);
 }
 
-} // namespace sirkus::ui
+} // namespace Sirkus::UI

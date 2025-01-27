@@ -4,7 +4,7 @@
 #include "Scale.h"
 #include <cstdint>
 
-namespace sirkus {
+namespace Sirkus {
 
 // Scale quantization modes
 enum class ScaleMode {
@@ -85,4 +85,4 @@ inline int noteLengthToTicks(NoteLength length) {
     }
 }
 
-} // namespace sirkus
+} // namespace Sirkus

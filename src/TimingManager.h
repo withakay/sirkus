@@ -5,7 +5,7 @@
 
 #include <JuceHeader.h>
 
-namespace sirkus {
+namespace Sirkus {
 class TimingManager
 {
 public:
@@ -54,4 +54,4 @@ private:
 
     void updateHostPositionInfo(const juce::AudioPlayHead::PositionInfo& pos);
 };
-} // namespace sirkus
+} // namespace Sirkus

@@ -67,10 +67,10 @@ public:
     void setHostSyncEnabled(const bool enabled);
 
     // Direct access to sequencer
-    sirkus::Sequencer& getSequencer();
+    Sirkus::Sequencer& getSequencer();
 
 private:
-    sirkus::Sequencer sequencer = sirkus::Sequencer();
+    Sirkus::Sequencer sequencer = Sirkus::Sequencer();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessor)

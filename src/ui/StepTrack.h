@@ -4,7 +4,7 @@
 #include <JuceHeader.h>
 #include <vector>
 
-namespace sirkus::ui {
+namespace Sirkus::UI {
 
 class StepTrack : public juce::Component, private StepButton::Listener {
 public:
@@ -73,4 +73,4 @@ public:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StepTrack)
 };
 
-} // namespace sirkus::ui
+} // namespace Sirkus::UI

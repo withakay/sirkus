@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace sirkus {
+namespace Sirkus {
 
 // Forward declarations
 class Track;
@@ -41,4 +41,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StepProcessor)
 };
 
-} // namespace sirkus
+} // namespace Sirkus

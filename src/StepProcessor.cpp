@@ -3,7 +3,7 @@
 #include "Constants.h"
 #include <algorithm>
 
-namespace sirkus {
+namespace Sirkus {
 
 StepProcessor::StepProcessor() = default;
 
@@ -90,4 +90,4 @@ void StepProcessor::processStep(
     }
 }
 
-} // namespace sirkus
+} // namespace Sirkus
