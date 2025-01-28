@@ -41,25 +41,21 @@ void StepButton::mouseDown(const juce::MouseEvent& event)
 
     if (event.mods.isShiftDown())
     {
-        listeners.call(
-            [this](Listener& l) {
-                l.stepButtonRangeSelect(this);
-            });
+        listeners.call([this](Listener& l) { l.stepButtonRangeSelect(this); });
     }
     else
     {
-        enabled = !enabled;
-        repaint();
-
         const auto mods = event.mods; // Capture the mods locally
-        listeners.call(
-            [this, mods](Listener& l) {
-                l.stepButtonClicked(this, mods);
-            });
-        listeners.call(
-            [this](Listener& l) {
-                l.stepButtonStateChanged(this);
-            });
+        listeners.call([this, mods](Listener& l) { l.stepButtonClicked(this, mods); });
+
+        // Only notify state change if enabled state actually changes
+        const bool newEnabled = !enabled;
+        if (enabled != newEnabled)
+        {
+            enabled = newEnabled;
+            repaint();
+            listeners.call([this](Listener& l) { l.stepButtonStateChanged(this); });
+        }
     }
 }
 
@@ -67,10 +63,7 @@ void StepButton::mouseUp(const juce::MouseEvent& event)
 {
     if (mouseWasDragged)
     {
-        listeners.call(
-            [this](Listener& l) {
-                l.stepButtonStateChanged(this);
-            });
+        listeners.call([this](Listener& l) { l.stepButtonStateChanged(this); });
     }
     mouseWasDragged = false;
 }
@@ -81,10 +74,7 @@ void StepButton::setEnabled(bool shouldBeEnabled)
     {
         enabled = shouldBeEnabled;
         repaint();
-        listeners.call(
-            [this](Listener& l) {
-                l.stepButtonStateChanged(this);
-            });
+        listeners.call([this](Listener& l) { l.stepButtonStateChanged(this); });
     }
 }
 

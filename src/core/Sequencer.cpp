@@ -1,9 +1,9 @@
 #include "Sequencer.h"
-#include "Constants.h"
+#include "../Constants.h"
 #include <algorithm>
 #include <vector>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 Sequencer::Sequencer()
 {
@@ -28,6 +28,9 @@ Track* Sequencer::addTrack()
     // Store track and get raw pointer before moving
     auto* rawTrack = track.get();
     tracks.push_back(std::move(track));
+
+    DBG("Sequencer::addTrack(); trackId=" << std::to_string(trackId));
+
     return rawTrack;
 }
 
@@ -157,4 +160,4 @@ void Sequencer::updateTrackSwing() const
     }
 }
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

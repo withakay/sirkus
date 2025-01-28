@@ -2,7 +2,7 @@
 #include <JuceHeader.h>
 #include <algorithm>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 Scale::Scale() : degrees(MAJOR_SCALE.begin(), MAJOR_SCALE.end())
 {
@@ -292,4 +292,4 @@ std::vector<uint8_t> Scale::applyRootToScale(const uint8_t* scale, size_t size, 
     return result;
 }
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

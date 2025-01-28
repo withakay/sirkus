@@ -1,6 +1,8 @@
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
+
 #include "Constants.h"
+#include "PluginEditor.h"
+
 
 SirkusAudioProcessor::SirkusAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -15,11 +17,15 @@ SirkusAudioProcessor::SirkusAudioProcessor()
         )
 #endif
 {
+    while (sequencer.getTrackCount() < Sirkus::UI::TrackPanelConfig::numTracks)
+    {
+        sequencer.addTrack();
+    }
 }
 
 SirkusAudioProcessor::~SirkusAudioProcessor() = default;
 
-void SirkusAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void SirkusAudioProcessor::prepareToPlay(const double sampleRate, const int samplesPerBlock)
 {
     SIRKUS_UNUSED(samplesPerBlock);
     sequencer.prepare(sampleRate);
@@ -34,7 +40,8 @@ void SirkusAudioProcessor::setHostSyncEnabled(const bool enabled)
     sequencer.getTimingManager().setHostSyncEnabled(enabled);
 }
 
-[[nodiscard]] bool SirkusAudioProcessor::isHostSyncEnabled() const
+[[nodiscard]]
+bool SirkusAudioProcessor::isHostSyncEnabled() const
 {
     return sequencer.getTimingManager().isHostSyncEnabled();
 }
@@ -49,7 +56,19 @@ void SirkusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     if (playHead != nullptr)
     {
         sequencer.processBlock(playHead, numSamples, midiMessages);
+
+        // Store MIDI messages for the editor
+        const juce::ScopedLock sl(midiBufferLock);
+        latestMidiMessages = midiMessages;
     }
+}
+
+juce::MidiBuffer SirkusAudioProcessor::getAndClearLatestMidiMessages()
+{
+    const juce::ScopedLock sl(midiBufferLock);
+    juce::MidiBuffer messages;
+    messages.swapWith(latestMidiMessages);
+    return messages;
 }
 
 const juce::String SirkusAudioProcessor::getName() const
@@ -144,7 +163,7 @@ bool SirkusAudioProcessor::isInStandaloneMode() const
     return sequencer.getTimingManager().isStandaloneMode();
 }
 
-Sirkus::Sequencer& SirkusAudioProcessor::getSequencer()
+Sirkus::Core::Sequencer& SirkusAudioProcessor::getSequencer()
 {
     return sequencer;
 }
@@ -203,7 +222,6 @@ void SirkusAudioProcessor::setStateInformation(const void* data, int sizeInBytes
     SIRKUS_UNUSED(data);
     SIRKUS_UNUSED(sizeInBytes);
 }
-
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {

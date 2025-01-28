@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include "Sequencer.h"
+#include "core/Sequencer.h"
+
 #include <JuceHeader.h>
+
 
 //==============================================================================
 /**
@@ -67,12 +69,17 @@ public:
     void setHostSyncEnabled(const bool enabled);
 
     // Direct access to sequencer
-    Sirkus::Sequencer& getSequencer();
+    Sirkus::Core::Sequencer& getSequencer();
 
 private:
-    Sirkus::Sequencer sequencer = Sirkus::Sequencer();
+    Sirkus::Core::Sequencer sequencer = Sirkus::Core::Sequencer();
+    juce::MidiBuffer latestMidiMessages;
+    juce::CriticalSection midiBufferLock;
+
+public:
+    // Get the latest MIDI messages and clear the buffer
+    juce::MidiBuffer getAndClearLatestMidiMessages();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessor)
 };
-

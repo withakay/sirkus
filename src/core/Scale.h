@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 class Scale
 {
@@ -85,4 +85,4 @@ private:
     std::vector<uint8_t> degrees; // Current scale degrees with root applied
 };
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

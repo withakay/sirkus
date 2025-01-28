@@ -4,7 +4,7 @@
 #include <atomic>
 #include <cstdint>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 struct Step
 {
@@ -26,4 +26,4 @@ struct Step
     }
 } __attribute__((aligned(32)));
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

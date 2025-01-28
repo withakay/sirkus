@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cstdint>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 Track::Track(const uint32_t id) : trackId(id), currentPattern(std::make_unique<Pattern>())
 {
@@ -45,4 +45,4 @@ std::vector<std::pair<int, const Step*>> Track::getActiveSteps(int startTick, in
     return activeSteps;
 }
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

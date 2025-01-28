@@ -2,7 +2,9 @@
 #include <cassert>
 #include <cstdint>
 
-namespace Sirkus {
+namespace Sirkus::Core {
+
+using namespace Sirkus::Constants;
 
 void TriggerBuffer::addStep(int tick, size_t stepIndex)
 {
@@ -70,8 +72,9 @@ void Pattern::initializeStepTiming(const size_t stepIndex)
     this->activeBuffer.store(0, std::memory_order_release);
 }
 
-void Pattern::setStepEnabled(const size_t stepIndex, bool enabled)
+void Pattern::setStepEnabled(const size_t stepIndex, const bool enabled)
 {
+    DBG("Pattern::setStepEnabled: " << stepIndex << " -> " << std::to_string(enabled));
     if (stepIndex >= MAX_STEPS)
         return;
     this->steps[stepIndex].enabled = enabled;
@@ -80,6 +83,8 @@ void Pattern::setStepEnabled(const size_t stepIndex, bool enabled)
 
 void Pattern::setStepNote(const size_t stepIndex, uint8_t note)
 {
+    DBG("Pattern::setStepNote: " << stepIndex << " -> " << std::to_string(note));
+
     if (stepIndex >= MAX_STEPS)
         return;
     this->steps[stepIndex].note = note;
@@ -131,6 +136,8 @@ void Pattern::setStepNoteLength(const size_t stepIndex, NoteLength noteLength)
 
 void Pattern::setLength(size_t newLength)
 {
+    DBG("Pattern::setLength: " << newLength);
+
     if (newLength > MAX_STEPS)
         return;
 
@@ -266,4 +273,4 @@ const std::map<int, size_t>& Pattern::getTriggerMap() const
     return triggerBuffers[this->activeBuffer.load(std::memory_order_acquire)].tickToStep;
 }
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

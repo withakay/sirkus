@@ -1,9 +1,9 @@
 #include "StepProcessor.h"
 #include "Track.h"
-#include "Constants.h"
+#include "../Constants.h"
 #include <algorithm>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 StepProcessor::StepProcessor() = default;
 
@@ -17,6 +17,8 @@ void StepProcessor::processSteps(
     int numTicks,
     juce::MidiBuffer& midiOut)
 {
+    // DBG("Processing steps for track: " << std::to_string(trackInfo.id));
+    // DBG("Given steps count: " << std::to_string(steps.size()));
     // Process each active step
     for (const auto& [triggerTick, step] : steps)
     {
@@ -44,7 +46,9 @@ void StepProcessor::processStep(
     const int numTicks,
     juce::MidiBuffer& midiOut)
 {
-    const int noteOnOffset = static_cast<int>((triggerTick - startTick));
+    DBG("Processing step at tick: " << triggerTick << ", note: " << step.note);
+
+    const int noteOnOffset = triggerTick - startTick;
 
     // Apply scale quantization based on mode
     uint8_t finalNote = step.note;
@@ -90,4 +94,4 @@ void StepProcessor::processStep(
     }
 }
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

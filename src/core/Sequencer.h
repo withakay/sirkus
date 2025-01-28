@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Constants.h"
+#include "../Constants.h"
 #include "TimingManager.h"
 #include "Track.h"
 #include "StepProcessor.h"
@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 class Sequencer
 {
@@ -88,4 +88,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sequencer)
 };
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

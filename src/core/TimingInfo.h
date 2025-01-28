@@ -5,7 +5,7 @@
 #include <optional>
 #include <utility>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 struct MusicalPosition
 {
@@ -34,4 +34,4 @@ struct TimingInfo
     static TimingInfo fromInternalTransport(const InternalTransport& transport);
 } __attribute__((aligned(128)));
 
-} // namespace Sirkus
+} // namespace Sirkus::Core

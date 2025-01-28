@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Constants.h"
+#include "../Constants.h"
 #include "Step.h"
 #include "Types.h"
 
@@ -10,7 +10,7 @@
 #include <map>
 #include <mutex>
 
-namespace Sirkus {
+namespace Sirkus::Core {
 
 struct TriggerBuffer
 {
@@ -95,4 +95,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Pattern)
 };
 
-} // namespace Sirkus
+} // namespace Sirkus::Core
