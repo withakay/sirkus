@@ -118,8 +118,8 @@ void SirkusAudioProcessorEditor::timerCallback()
 
 void SirkusAudioProcessorEditor::updatePositionDisplay()
 {
-    const auto& sequencer = processorRef.getSequencer();
-    const auto& timing = sequencer.getTimingManager();
+    auto& sequencer = processorRef.getSequencer();
+    auto& timing = sequencer.getTimingManager();
 
     if (const auto pos = timing.getMusicalPosition())
     {
@@ -152,8 +152,8 @@ void SirkusAudioProcessorEditor::updateTransportDisplay()
 
 void SirkusAudioProcessorEditor::updatePlaybackPosition()
 {
-    const auto& sequencer = processorRef.getSequencer();
-    const auto& timing = sequencer.getTimingManager();
+    auto& sequencer = processorRef.getSequencer();
+    auto& timing = sequencer.getTimingManager();
 
     // Clear all step triggers first
     trackPanel.clearAllTriggers();

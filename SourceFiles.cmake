@@ -23,6 +23,7 @@ set(SourceFiles
     src/core/TimingManager.cpp
     src/core/Sequencer.cpp
     src/core/Types.h
+    src/core/ValueTreeObject.h
     src/core/InternalTransport.cpp
     src/core/Step.h
     src/core/TimingInfo.cpp
@@ -38,6 +39,7 @@ set(SourceFiles
     src/core/TimingManager.h
     src/PluginProcessor.h
     src/Constants.h
+    src/Identifiers.h
     src/PluginProcessor.cpp
     src/PluginEditor.cpp
 )

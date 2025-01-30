@@ -61,9 +61,9 @@ public:
     void setStandaloneBpm(double bpm);
     void startStandalonePlayback();
     void stopStandalonePlayback();
-    bool isStandalonePlaying() const;
-    bool isInStandaloneMode() const;
-    bool isHostSyncEnabled() const;
+    bool isStandalonePlaying();
+    bool isInStandaloneMode();
+    bool isHostSyncEnabled();
 
     // Host sync control
     void setHostSyncEnabled(const bool enabled);
@@ -72,9 +72,11 @@ public:
     Sirkus::Core::Sequencer& getSequencer();
 
 private:
-    Sirkus::Core::Sequencer sequencer = Sirkus::Core::Sequencer();
     juce::MidiBuffer latestMidiMessages;
     juce::CriticalSection midiBufferLock;
+    juce::ValueTree pluginState;
+    juce::UndoManager undoManager;
+    Sirkus::Core::Sequencer sequencer;
 
 public:
     // Get the latest MIDI messages and clear the buffer

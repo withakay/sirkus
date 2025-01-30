@@ -25,8 +25,8 @@ private:
         juce::uint32 timestamp;
 
         LogEntry(const juce::String& desc, juce::uint32 time)
-                : description(desc)
-                , timestamp(time)
+            : description(desc)
+              , timestamp(time)
         {
         }
     };
@@ -35,8 +35,9 @@ private:
     static constexpr size_t maxEvents = 100;
     static constexpr int refreshRate = 50; // ms
 
-    juce::Font font{14.0f};
-    float lineHeight = 16.0f;
+    juce::Font font = juce::Font(juce::FontOptions("SF Mono", 13.0f, juce::Font::plain));
+
+    int lineHeight = 16;
 
     void trimLog();
     juce::String formatTimestamp(juce::uint32 timestamp) const;

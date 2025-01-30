@@ -1,11 +1,14 @@
 #include "Sequencer.h"
+
 #include "../Constants.h"
+
 #include <algorithm>
 #include <vector>
 
 namespace Sirkus::Core {
 
-Sequencer::Sequencer()
+Sequencer::Sequencer(ValueTree parentState, UndoManager& undoManagerToUse)
+    : ValueTreeWrapper(parentState, ID::sequencer, undoManagerToUse)
 {
     // Create initial track
     addTrack();
@@ -23,7 +26,7 @@ Track* Sequencer::addTrack()
 
     // Apply global swing to pattern
     Pattern* pattern = track->getCurrentPattern();
-    pattern->setSwingAmount(globalSwing);
+    pattern->setSwingAmount(swingAmount);
 
     // Store track and get raw pointer before moving
     auto* rawTrack = track.get();
@@ -43,9 +46,8 @@ bool Sequencer::removeTrack(uint32_t trackId)
     }
 
     // Find track with matching ID
-    auto it = std::find_if(
-        tracks.begin(),
-        tracks.end(),
+    auto it = std::ranges::find_if(
+        tracks,
         [trackId](const auto& track) {
             return track->getId() == trackId;
         });
@@ -71,25 +73,13 @@ Track* Sequencer::getTrack(uint32_t trackId)
     return it != tracks.end() ? it->get() : nullptr;
 }
 
-const Track* Sequencer::getTrack(uint32_t trackId) const
-{
-    auto it =
-        std::find_if(
-            tracks.begin(),
-            tracks.end(),
-            [trackId](const auto& track) {
-                return track->getId() == trackId;
-            });
-    return it != tracks.end() ? it->get() : nullptr;
-}
-
-void Sequencer::prepare(double sampleRate)
+void Sequencer::prepare(const double sampleRate)
 {
     currentSampleRate = sampleRate;
     timingManager.prepare(sampleRate);
 }
 
-void Sequencer::processBlock(juce::AudioPlayHead* playHead, int numSamples, juce::MidiBuffer& midiOut)
+void Sequencer::processBlock(const juce::AudioPlayHead* playHead, const int numSamples, juce::MidiBuffer& midiOut)
 {
     timingManager.processBlock(playHead, numSamples);
 
@@ -112,33 +102,48 @@ void Sequencer::processBlock(juce::AudioPlayHead* playHead, int numSamples, juce
     for (const auto& track : tracks)
     {
         auto activeSteps = track->getActiveSteps(startTick, numTicks);
-        stepProcessor.processSteps(
-            activeSteps,
-            track->getTrackInfo(),
-            globalScale,
-            startTick,
-            numTicks,
-            midiOut);
+        stepProcessor.processSteps(activeSteps, track->getTrackInfo(), globalScale, startTick, numTicks, midiOut);
     }
 }
 
-void Sequencer::setGlobalSwing(const float amount)
+Scale::Type Sequencer::getScaleType() const
 {
-    globalSwing = amount;
+    return scaleType;
+}
+
+uint8_t Sequencer::getScaleRoot() const
+{
+    return scaleRoot;
+}
+
+const std::vector<uint8_t>& Sequencer::getGlobalCustomDegrees() const
+{
+    return globalCustomDegrees;
+}
+
+float Sequencer::getSwingAmount() const
+{
+    return getProperty(props::swingAmount);
+}
+
+void Sequencer::setSwingAmount(const float amount)
+{
+    setProperty(props::swingAmount, amount);
+    swingAmount = amount;
     updateTrackSwing();
 }
 
-void Sequencer::setGlobalScale(Scale::Type type, uint8_t root)
+void Sequencer::setScale(Scale::Type type, uint8_t root)
 {
-    globalScaleType = type;
-    globalScaleRoot = root % 12;
+    scaleType = type;
+    scaleRoot = root % 12;
     globalScale = Scale(type, root);
 }
 
-void Sequencer::setGlobalCustomScale(const std::vector<uint8_t>& degrees, uint8_t root)
+void Sequencer::setCustomScale(const std::vector<uint8_t>& degrees, uint8_t root)
 {
-    globalScaleType = Scale::Type::Custom;
-    globalScaleRoot = root % 12;
+    scaleType = Scale::Type::Custom;
+    scaleRoot = root % 12;
     globalCustomDegrees = degrees;
     globalScale = Scale(degrees, root);
 }
@@ -148,9 +153,20 @@ uint32_t Sequencer::generateTrackId()
     return nextTrackId++;
 }
 
+size_t Sequencer::getTrackCount() const
+{
+    return tracks.size();
+}
+
+// Timing Control
+TimingManager& Sequencer::getTimingManager()
+{
+    return timingManager;
+}
+
 void Sequencer::updateTrackSwing() const
 {
-    const float amount = globalSwing;
+    const float amount = swingAmount;
     for (const auto& track : tracks)
     {
         if (auto* pattern = track->getCurrentPattern())

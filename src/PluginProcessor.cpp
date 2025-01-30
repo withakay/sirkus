@@ -5,17 +5,10 @@
 
 
 SirkusAudioProcessor::SirkusAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-    : AudioProcessor(
-        BusesProperties()
-        #if !JucePlugin_IsMidiEffect
-        #if !JucePlugin_IsSynth
-                             .withInput("Input", juce::AudioChannelSet::stereo(), true)
-        #endif
-                             .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-        #endif
-        )
-#endif
+    : AudioProcessor(BusesProperties())
+      , pluginState(juce::Identifier("SirkusPluginState"))
+      , undoManager(50)
+      , sequencer(pluginState, undoManager)
 {
     while (sequencer.getTrackCount() < Sirkus::UI::TrackPanelConfig::numTracks)
     {
@@ -41,7 +34,7 @@ void SirkusAudioProcessor::setHostSyncEnabled(const bool enabled)
 }
 
 [[nodiscard]]
-bool SirkusAudioProcessor::isHostSyncEnabled() const
+bool SirkusAudioProcessor::isHostSyncEnabled()
 {
     return sequencer.getTimingManager().isHostSyncEnabled();
 }
@@ -153,12 +146,12 @@ void SirkusAudioProcessor::stopStandalonePlayback()
     sequencer.getTimingManager().stop();
 }
 
-bool SirkusAudioProcessor::isStandalonePlaying() const
+bool SirkusAudioProcessor::isStandalonePlaying()
 {
     return sequencer.getTimingManager().isPlaying();
 }
 
-bool SirkusAudioProcessor::isInStandaloneMode() const
+bool SirkusAudioProcessor::isInStandaloneMode()
 {
     return sequencer.getTimingManager().isStandaloneMode();
 }

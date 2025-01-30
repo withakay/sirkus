@@ -19,14 +19,15 @@ void MidiEventLog::paint(juce::Graphics& g)
     g.setFont(font);
     g.setColour(juce::Colours::lightgreen);
 
-    float y = 4.0f;
+    int y = 4;
     for (const auto& entry : eventLog)
     {
+        constexpr int x = 4;
         g.drawText(
             formatTimestamp(entry.timestamp) + " " + entry.description,
-            4.0f,
+            x,
             y,
-            getWidth() - 8.0f,
+            getWidth() - 2 * x,
             lineHeight,
             juce::Justification::left,
             true);
@@ -47,10 +48,11 @@ void MidiEventLog::timerCallback()
 void MidiEventLog::logMidiMessage(const juce::MidiMessage& message)
 {
     // Use MessageManager to safely post from audio thread
-    juce::MessageManager::callAsync([this, message]() {
-        eventLog.emplace_front(formatMidiMessage(message), juce::Time::getMillisecondCounter());
-        trimLog();
-    });
+    juce::MessageManager::callAsync(
+        [this, message]() {
+            eventLog.emplace_front(formatMidiMessage(message), juce::Time::getMillisecondCounter());
+            trimLog();
+        });
 }
 
 void MidiEventLog::trimLog()
