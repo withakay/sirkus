@@ -1,25 +1,24 @@
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
+
 #include "Constants.h"
+#include "PluginEditor.h"
+
 
 SirkusAudioProcessor::SirkusAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-    : AudioProcessor(
-        BusesProperties()
-        #if !JucePlugin_IsMidiEffect
-        #if !JucePlugin_IsSynth
-                             .withInput("Input", juce::AudioChannelSet::stereo(), true)
-        #endif
-                             .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-        #endif
-        )
-#endif
+    : AudioProcessor(BusesProperties())
+      , pluginState(juce::Identifier("SirkusPluginState"))
+      , undoManager(50)
+      , sequencer(pluginState, undoManager)
 {
+    while (sequencer.getTrackCount() < Sirkus::UI::TrackPanelConfig::numTracks)
+    {
+        sequencer.createTrack();
+    }
 }
 
 SirkusAudioProcessor::~SirkusAudioProcessor() = default;
 
-void SirkusAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void SirkusAudioProcessor::prepareToPlay(const double sampleRate, const int samplesPerBlock)
 {
     SIRKUS_UNUSED(samplesPerBlock);
     sequencer.prepare(sampleRate);
@@ -34,7 +33,8 @@ void SirkusAudioProcessor::setHostSyncEnabled(const bool enabled)
     sequencer.getTimingManager().setHostSyncEnabled(enabled);
 }
 
-[[nodiscard]] bool SirkusAudioProcessor::isHostSyncEnabled() const
+[[nodiscard]]
+bool SirkusAudioProcessor::isHostSyncEnabled()
 {
     return sequencer.getTimingManager().isHostSyncEnabled();
 }
@@ -49,7 +49,19 @@ void SirkusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     if (playHead != nullptr)
     {
         sequencer.processBlock(playHead, numSamples, midiMessages);
+
+        // Store MIDI messages for the editor
+        const juce::ScopedLock sl(midiBufferLock);
+        latestMidiMessages = midiMessages;
     }
+}
+
+juce::MidiBuffer SirkusAudioProcessor::getAndClearLatestMidiMessages()
+{
+    const juce::ScopedLock sl(midiBufferLock);
+    juce::MidiBuffer messages;
+    messages.swapWith(latestMidiMessages);
+    return messages;
 }
 
 const juce::String SirkusAudioProcessor::getName() const
@@ -134,17 +146,17 @@ void SirkusAudioProcessor::stopStandalonePlayback()
     sequencer.getTimingManager().stop();
 }
 
-bool SirkusAudioProcessor::isStandalonePlaying() const
+bool SirkusAudioProcessor::isStandalonePlaying()
 {
     return sequencer.getTimingManager().isPlaying();
 }
 
-bool SirkusAudioProcessor::isInStandaloneMode() const
+bool SirkusAudioProcessor::isInStandaloneMode()
 {
     return sequencer.getTimingManager().isStandaloneMode();
 }
 
-sirkus::Sequencer& SirkusAudioProcessor::getSequencer()
+Sirkus::Core::Sequencer& SirkusAudioProcessor::getSequencer()
 {
     return sequencer;
 }
@@ -203,7 +215,6 @@ void SirkusAudioProcessor::setStateInformation(const void* data, int sizeInBytes
     SIRKUS_UNUSED(data);
     SIRKUS_UNUSED(sizeInBytes);
 }
-
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {

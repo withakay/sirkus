@@ -1,6 +1,6 @@
 #include "TransportControls.h"
 
-namespace sirkus::ui {
+namespace Sirkus::UI {
 
 TransportControls::TransportControls(SirkusAudioProcessor& p)
     : processorRef(p)
@@ -38,4 +38,4 @@ void TransportControls::resized()
     hostSyncButton.setBounds(area.removeFromTop(30));
 }
 
-} // namespace sirkus::ui
+} // namespace Sirkus::UI

@@ -2,7 +2,7 @@
 
 #include "TimingInfo.h"
 
-namespace sirkus {
+namespace Sirkus::Core {
 class InternalTransport
 {
 public:
@@ -39,4 +39,4 @@ private:
     [[nodiscard]] double ppqPositionToBeats(double ppq) const;
     [[nodiscard]] double beatsToNextBar(const MusicalPosition& pos) const;
 };
-} // namespace sirkus
+} // namespace Sirkus::Core

@@ -1,9 +1,12 @@
 #include "TimingInfo.h"
 
-#include "Constants.h"
+#include "../Constants.h"
 #include "InternalTransport.h"
 
-namespace sirkus {
+namespace Sirkus::Core {
+
+using namespace Sirkus::Constants;
+
 TimingInfo TimingInfo::fromPositionInfo(const juce::AudioPlayHead::PositionInfo& pos)
 {
     TimingInfo info;
@@ -40,4 +43,4 @@ TimingInfo TimingInfo::fromInternalTransport(const InternalTransport& transport)
 {
     return transport.getTimingInfo();
 }
-} // namespace sirkus
+} // namespace Sirkus::Core

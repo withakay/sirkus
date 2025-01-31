@@ -2,15 +2,15 @@
 
 #include "Scale.h"
 #include "Types.h"
-#include <JuceHeader.h>
+#include "../JuceHeader.h"
 #include <memory>
 #include <vector>
 
-namespace sirkus {
+namespace Sirkus::Core {
 
 // Forward declarations
 class Track;
-struct Step;
+class Step;
 
 class StepProcessor
 {
@@ -41,4 +41,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StepProcessor)
 };
 
-} // namespace sirkus
+} // namespace Sirkus::Core

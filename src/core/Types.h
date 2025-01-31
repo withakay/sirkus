@@ -1,10 +1,12 @@
 #pragma once
 
-#include "Constants.h"
+#include "../Constants.h"
 #include "Scale.h"
 #include <cstdint>
 
-namespace sirkus {
+namespace Sirkus::Core {
+
+using namespace Sirkus::Constants;
 
 // Scale quantization modes
 enum class ScaleMode {
@@ -85,4 +87,4 @@ inline int noteLengthToTicks(NoteLength length) {
     }
 }
 
-} // namespace sirkus
+} // namespace Sirkus::Core

@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include "Sequencer.h"
-#include <JuceHeader.h>
+#include "core/Sequencer.h"
+
+#include "JuceHeader.h"
+
 
 //==============================================================================
 /**
@@ -59,20 +61,27 @@ public:
     void setStandaloneBpm(double bpm);
     void startStandalonePlayback();
     void stopStandalonePlayback();
-    bool isStandalonePlaying() const;
-    bool isInStandaloneMode() const;
-    bool isHostSyncEnabled() const;
+    bool isStandalonePlaying();
+    bool isInStandaloneMode();
+    bool isHostSyncEnabled();
 
     // Host sync control
     void setHostSyncEnabled(const bool enabled);
 
     // Direct access to sequencer
-    sirkus::Sequencer& getSequencer();
+    Sirkus::Core::Sequencer& getSequencer();
 
 private:
-    sirkus::Sequencer sequencer = sirkus::Sequencer();
+    juce::MidiBuffer latestMidiMessages;
+    juce::CriticalSection midiBufferLock;
+    juce::ValueTree pluginState;
+    juce::UndoManager undoManager;
+    Sirkus::Core::Sequencer sequencer;
+
+public:
+    // Get the latest MIDI messages and clear the buffer
+    juce::MidiBuffer getAndClearLatestMidiMessages();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessor)
 };
-

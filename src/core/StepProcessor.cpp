@@ -1,9 +1,9 @@
 #include "StepProcessor.h"
 #include "Track.h"
-#include "Constants.h"
+#include "../Constants.h"
 #include <algorithm>
 
-namespace sirkus {
+namespace Sirkus::Core {
 
 StepProcessor::StepProcessor() = default;
 
@@ -17,11 +17,13 @@ void StepProcessor::processSteps(
     int numTicks,
     juce::MidiBuffer& midiOut)
 {
+    // DBG("Processing steps for track: " << std::to_string(trackInfo.id));
+    // DBG("Given steps count: " << std::to_string(steps.size()));
     // Process each active step
     for (const auto& [triggerTick, step] : steps)
     {
         if (step &&
-            juce::Random::getSystemRandom().nextFloat() <= step->probability)
+            juce::Random::getSystemRandom().nextFloat() <= step->getProbability())
         {
             processStep(
                 *step,
@@ -44,29 +46,31 @@ void StepProcessor::processStep(
     const int numTicks,
     juce::MidiBuffer& midiOut)
 {
-    const int noteOnOffset = static_cast<int>((triggerTick - startTick));
+    DBG("Processing step at tick: " << triggerTick << ", note: " << step.getNote());
+
+    const int noteOnOffset = triggerTick - startTick;
 
     // Apply scale quantization based on mode
-    uint8_t finalNote = step.note;
+    uint8_t finalNote = step.getNote();
     switch (trackInfo.scaleMode)
     {
         case ScaleMode::Off:
             break;
         case ScaleMode::QuantizeUp:
-            finalNote = scale.quantizeUp(step.note);
+            finalNote = scale.quantizeUp(step.getNote());
             break;
         case ScaleMode::QuantizeDown:
-            finalNote = scale.quantizeDown(step.note);
+            finalNote = scale.quantizeDown(step.getNote());
             break;
         case ScaleMode::QuantizeRandom:
-            finalNote = scale.quantizeRandom(step.note);
+            finalNote = scale.quantizeRandom(step.getNote());
             break;
         default:
             break;
     }
 
     const uint8_t channel = trackInfo.midiChannel;
-    const uint8_t velocity = step.velocity;
+    const uint8_t velocity = step.getVelocity();
 
     // Calculate note-off position based on note length
     const auto noteLengthTicks = step.getNoteLengthInTicks();
@@ -90,4 +94,4 @@ void StepProcessor::processStep(
     }
 }
 
-} // namespace sirkus
+} // namespace Sirkus::Core

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sirkus Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        .mermaid {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <h1>Sirkus Architecture</h1>
+        <div class="mermaid">
+            graph TD
+            %% Core Audio Processing
+            subgraph Audio Engine
+            AP[AudioProcessor] --> SEQ[Sequencer]
+            SEQ --> TM[TimingManager]
+            SEQ --> SP[StepProcessor]
+            SEQ --> TR[Tracks]
+            TR --> ST[Steps]
+            TM --> TI[TimingInfo]
+            end
+
+            %% UI Components
+            subgraph UI Layer
+            PE[PluginEditor] --> GC[GlobalControls]
+            PE --> PV[PatternView]
+            PE --> SC[StepControls]
+            PV --> STR[StepTracks]
+            STR --> SB[StepButtons]
+            PE --> TC[TransportControls]
+            end
+
+            %% Data Flow
+            subgraph Data Flow
+            PAT[Pattern] --> TR
+            SCA[Scale] --> SEQ
+            SB --> ST
+            TC --> TM
+            end
+
+            %% Component Communication
+            GC -->|Pattern Settings| PV
+            SC -->|Step Parameters| SB
+            SB -->|Step State| STR
+            STR -->|Track State| PV
+            PV -->|Pattern State| PE
+            PE -->|UI State| AP
+            AP -->|Audio/MIDI| OUT[DAW/Output]
+
+            %% Styling
+            classDef core fill:#f9f,stroke:#333,stroke-width:2px
+            classDef ui fill:#bbf,stroke:#333,stroke-width:2px
+            classDef data fill:#bfb,stroke:#333,stroke-width:2px
+
+            class AP,SEQ,TM,SP core
+            class PE,GC,PV,SC,STR,SB,TC ui
+            class PAT,SCA,TR,ST data
+        </div>
+
+        <h2>Component Descriptions</h2>
+
+        <h3>Audio Engine</h3>
+        <ul>
+            <li><strong>AudioProcessor:</strong> Main JUCE plugin processor handling audio/MIDI I/O</li>
+            <li><strong>Sequencer:</strong> Core sequencing engine managing tracks and timing</li>
+            <li><strong>TimingManager:</strong> Handles synchronization with host or internal clock</li>
+            <li><strong>StepProcessor:</strong> Processes step data into MIDI events</li>
+            <li><strong>Tracks:</strong> Collection of sequencer tracks</li>
+            <li><strong>Steps:</strong> Individual step data within tracks</li>
+        </ul>
+
+        <h3>UI Layer</h3>
+        <ul>
+            <li><strong>PluginEditor:</strong> Main plugin UI container</li>
+            <li><strong>GlobalControls:</strong> Pattern-wide settings (time signature, length)</li>
+            <li><strong>PatternView:</strong> Main pattern editing interface</li>
+            <li><strong>StepControls:</strong> Step parameter editing interface</li>
+            <li><strong>StepTracks:</strong> Track containers with step buttons</li>
+            <li><strong>StepButtons:</strong> Individual step UI elements</li>
+            <li><strong>TransportControls:</strong> Playback control interface</li>
+        </ul>
+
+        <h3>Data Flow</h3>
+        <ul>
+            <li><strong>Pattern:</strong> Pattern data structure</li>
+            <li><strong>Scale:</strong> Musical scale information</li>
+            <li><strong>Data Flow:</strong> Shows how data moves between components</li>
+        </ul>
+
+        <h2>Key Features</h2>
+        <ul>
+            <li>MIDI sequencing with multiple tracks</li>
+            <li>Host sync or standalone timing</li>
+            <li>Scale-based note input</li>
+            <li>Pattern-based sequencing</li>
+            <li>Modular UI architecture</li>
+            <li>Extensible track system</li>
+        </ul>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            themeVariables: {
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
+            }
+        });
+    </script>
+</body>
+
+</html>
