@@ -4,6 +4,9 @@
 .PHONY: help
 help:
 	@echo "Available targets:"
+	@echo "  Setup targets:"
+	@echo "    install-juce              - Install JUCE framework from git"
+	@echo ""
 	@echo "  Source targets:"
 	@echo "    update-sources            - Update SourceFiles.cmake with current source files"
 	@echo ""
@@ -63,6 +66,11 @@ standalone-debug: configure-ninja-debug
 
 standalone-release: configure-ninja-release
 	cmake --build --preset ninja-release-standalone
+
+# Setup targets
+.PHONY: install-juce
+install-juce:
+	git submodule update --init --recursive libs/juce
 
 # Source update target
 .PHONY: update-sources
