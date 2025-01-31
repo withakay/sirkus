@@ -2,7 +2,7 @@
 
 #include "Scale.h"
 #include "Types.h"
-#include <JuceHeader.h>
+#include "../JuceHeader.h"
 #include <memory>
 #include <vector>
 
@@ -10,7 +10,7 @@ namespace Sirkus::Core {
 
 // Forward declarations
 class Track;
-struct Step;
+class Step;
 
 class StepProcessor
 {

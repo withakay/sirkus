@@ -3,7 +3,7 @@
 #include "InternalTransport.h"
 #include "TimingInfo.h"
 
-#include <JuceHeader.h>
+#include "../JuceHeader.h"
 
 namespace Sirkus::Core {
 class TimingManager

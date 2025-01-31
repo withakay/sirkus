@@ -8,7 +8,7 @@
 #include "ui/TrackPanel.h"
 #include "ui/TransportControls.h"
 
-#include <JuceHeader.h>
+#include "JuceHeader.h"
 
 class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor,
                                    public juce::Timer,

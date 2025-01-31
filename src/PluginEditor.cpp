@@ -5,7 +5,7 @@
 #include "core/TimingManager.h"
 #include "core/Types.h"
 
-#include <JuceHeader.h>
+#include "JuceHeader.h"
 
 SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor& p)
     : AudioProcessorEditor(&p)

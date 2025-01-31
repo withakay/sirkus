@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SIRKUS_CONSTANTS_H
+#define SIRKUS_CONSTANTS_H
+
 
 namespace Sirkus::Constants {
 
@@ -37,3 +40,5 @@ static constexpr int NOTE_SIXTEEN_BARS = PPQN * 64; // 61440 ticks
 #define SIRKUS_UNUSED(x) (void)x
 
 } // namespace Sirkus::Core
+
+#endif // SIRKUS_CONSTANTS_H

@@ -1,4 +1,5 @@
 #include "Track.h"
+
 #include "Pattern.h"
 #include "Step.h"
 
@@ -7,22 +8,33 @@
 
 namespace Sirkus::Core {
 
-Track::Track(const uint32_t id) : trackId(id), currentPattern(std::make_unique<Pattern>())
+Track::Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id)
+    : ValueTreeObject(parentState, ID::track, undoManagerToUse)
 {
+    setProperty(props::trackId, id);
+    setProperty(props::midiChannel, static_cast<uint8_t>(1));
+    setProperty(props::scaleMode, ScaleMode::Off);
+
+    // Create initial pattern
+    ensurePatternExists();
 }
 
-void Track::setPattern(std::unique_ptr<Pattern> newPattern)
+
+void Track::ensurePatternExists()
 {
-    currentPattern = std::move(newPattern);
+    currentPattern = std::make_unique<Pattern>(state, undoManager);
+}
+
+Pattern& Track::getCurrentPattern() const
+{
+    return *currentPattern;
 }
 
 std::vector<std::pair<int, const Step*>> Track::getActiveSteps(int startTick, int numTicks) const
 {
     std::vector<std::pair<int, const Step*>> activeSteps;
-    if (!currentPattern)
-        return activeSteps;
-
-    const auto& triggers = currentPattern->getTriggerMap();
+    // const Pattern& patternRef = getCurrentPattern();
+    const auto& triggers = getCurrentPattern().getTriggerMap();
 
     // Find first trigger at or after startTick
     auto it = triggers.lower_bound(startTick);
@@ -31,10 +43,10 @@ std::vector<std::pair<int, const Step*>> Track::getActiveSteps(int startTick, in
     while (it != triggers.end() && it->first < startTick + numTicks)
     {
         const auto stepIndex = it->second;
-        const auto& step = currentPattern->getStep(stepIndex);
+        auto step = getCurrentPattern().getStepObject(stepIndex);
 
-        // Only include enabled steps that pass probability check
-        if (step.enabled)
+        // Only include enabled steps
+        if (step.isEnabled())
         {
             activeSteps.emplace_back(it->first, &step);
         }

@@ -1,4 +1,5 @@
 #include "Pattern.h"
+
 #include <cassert>
 #include <cstdint>
 
@@ -35,9 +36,7 @@ bool TriggerBuffer::verifyIntegrity() const
     if (tickToStep.size() != stepToTick.size())
         return false;
 
-    if (!std::ranges::all_of(
-        tickToStep,
-        [this](const auto& pair) {
+    if (!std::ranges::all_of(tickToStep, [this](const auto& pair) {
             const auto& [tick, step] = pair;
             auto it = stepToTick.find(step);
             return it != stepToTick.end() && it->second == tick;
@@ -48,28 +47,48 @@ bool TriggerBuffer::verifyIntegrity() const
     return true;
 }
 
-Pattern::Pattern()
+Pattern::Pattern(ValueTree parentState, UndoManager& undoManagerToUse)
+        : ValueTreeObject(parentState, ID::pattern, undoManagerToUse)
 {
-    // Initialize steps without locking
-    for (size_t i = 0; i < MAX_STEPS; ++i)
+    // Initialize default properties
+    setProperty(props::length, 16);
+    setProperty(props::swingAmount, 0.0f);
+    setProperty(props::stepInterval, StepInterval::Quarter);
+
+    // Initialize steps
+    for (size_t i = 0; i < 16; ++i)
     {
+        ensureStepExists(i);
         initializeStepTiming(i);
     }
 }
 
-void Pattern::initializeStepTiming(const size_t stepIndex)
+void Pattern::ensureStepExists(size_t stepIndex)
 {
-    // During construction, we only need to initialize buffer 0
-    if (steps[stepIndex].enabled)
-    {
-        int finalTick = calculateStepTick(stepIndex);
-        triggerBuffers[0].addStep(finalTick, stepIndex);
-    }
+    if (stepIndex >= MAX_STEPS)
+        return;
 
-    // Mark as initialized
-    triggerBuffers[0].dirty.store(true, std::memory_order_release);
-    // Set buffer 0 as active
-    this->activeBuffer.store(0, std::memory_order_release);
+    if (!state.getChild(static_cast<int>(stepIndex)).isValid())
+    {
+        Step step(state, undoManager);
+    }
+}
+
+Step Pattern::getStepObject(size_t stepIndex) const
+{
+    if (stepIndex >= MAX_STEPS)
+        return Step(ValueTree(ID::step), undoManager);
+
+    return Step(state.getChild(static_cast<int>(stepIndex)), undoManager);
+}
+
+bool Pattern::isStepEnabled(size_t stepIndex) const
+{
+    if (stepIndex >= MAX_STEPS)
+        return false;
+
+    auto step = getStepObject(stepIndex);
+    return step.isEnabled();
 }
 
 void Pattern::setStepEnabled(const size_t stepIndex, const bool enabled)
@@ -77,139 +96,112 @@ void Pattern::setStepEnabled(const size_t stepIndex, const bool enabled)
     DBG("Pattern::setStepEnabled: " << stepIndex << " -> " << std::to_string(enabled));
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].enabled = enabled;
-    updateStepTiming(stepIndex, true); // Acquire lock for single step update
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setEnabled(enabled);
+    updateStepTiming(stepIndex, true);
 }
 
 void Pattern::setStepNote(const size_t stepIndex, uint8_t note)
 {
     DBG("Pattern::setStepNote: " << stepIndex << " -> " << std::to_string(note));
-
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].note = note;
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setNote(note);
 }
 
 void Pattern::setStepVelocity(const size_t stepIndex, uint8_t velocity)
 {
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].velocity = velocity;
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setVelocity(velocity);
 }
 
 void Pattern::setStepProbability(const size_t stepIndex, float probability)
 {
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].probability = probability;
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setProbability(probability);
 }
 
 void Pattern::setStepOffset(const size_t stepIndex, float offset)
 {
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].timingOffset = offset;
-    updateStepTiming(stepIndex, true); // Acquire lock for single step update
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setTimingOffset(offset);
+    updateStepTiming(stepIndex, true);
 }
 
 void Pattern::setStepSwingAffected(const size_t stepIndex, bool affected)
 {
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].affectedBySwing = affected;
-    updateStepTiming(stepIndex, true); // Acquire lock for single step update
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setAffectedBySwing(affected);
+    updateStepTiming(stepIndex, true);
 }
 
 void Pattern::setStepTrackId(const size_t stepIndex, uint32_t trackId)
 {
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].trackId = trackId;
+
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setTrackId(trackId);
 }
 
-void Pattern::setStepNoteLength(const size_t stepIndex, NoteLength noteLength)
+void Pattern::setStepNoteLength(const size_t stepIndex, NoteLength length)
 {
     if (stepIndex >= MAX_STEPS)
         return;
-    this->steps[stepIndex].noteLength = noteLength;
-}
 
-void Pattern::setLength(size_t newLength)
-{
-    DBG("Pattern::setLength: " << newLength);
-
-    if (newLength > MAX_STEPS)
-        return;
-
-    this->length.store(newLength, std::memory_order_release);
-
-    // Update all steps as length affects tick calculation
-    std::lock_guard<std::mutex> lock(updateMutex);
-    for (size_t i = 0; i < newLength; ++i)
-    {
-        updateStepTiming(
-            i); // Use default acquireLock=false since we already hold the lock
-    }
-}
-
-void Pattern::setSwingAmount(float amount)
-{
-    this->swingAmount.store(amount, std::memory_order_release);
-
-    // Update all swing-affected steps
-    std::lock_guard<std::mutex> const lock(updateMutex);
-    const size_t currentLength = this->length.load(std::memory_order_acquire);
-    for (size_t i = 0; i < currentLength; ++i)
-    {
-        if (this->steps[i].affectedBySwing)
-        {
-            updateStepTiming(
-                i); // Use default acquireLock=false since we already hold the lock
-        }
-    }
-}
-
-void Pattern::setStepInterval(StepInterval interval)
-{
-    this->stepInterval.store(interval, std::memory_order_release);
-
-    // Update all steps as grid spacing affects tick calculation
-    std::lock_guard<std::mutex> lock(updateMutex);
-    const size_t currentLength = this->length.load(std::memory_order_acquire);
-    for (size_t i = 0; i < currentLength; ++i)
-    {
-        updateStepTiming(
-            i); // Use default acquireLock=false since we already hold the lock
-    }
-}
-
-const Step& Pattern::getStep(const size_t stepIndex) const
-{
-    assert(stepIndex < MAX_STEPS);
-    return this->steps[stepIndex];
+    ensureStepExists(stepIndex);
+    auto step = getStepObject(stepIndex);
+    step.setNoteLength(length);
 }
 
 int Pattern::calculateStepTick(const size_t stepIndex) const
 {
+    if (stepIndex >= MAX_STEPS)
+        return 0;
+
+    auto step = getStepObject(stepIndex);
+
     // Calculate base tick using step interval
-    const int gridSpacing = stepIntervalToTicks(this->stepInterval.load(std::memory_order_acquire));
+    const int gridSpacing = stepIntervalToTicks(getProperty(props::stepInterval));
     const int baseTick = static_cast<int>(stepIndex) * gridSpacing;
     int finalTick = baseTick;
 
     // Apply swing if applicable
-    if (this->steps[stepIndex].affectedBySwing && (stepIndex % 2) != 0)
+    if (step.isAffectedBySwing() && (stepIndex % 2) != 0)
     {
-        finalTick += static_cast<int>(
-            PPQN * this->swingAmount.load(std::memory_order_acquire));
+        finalTick += static_cast<int>(PPQN * getProperty(props::swingAmount));
     }
 
     // Apply micro-timing offset
-    const float offset = this->steps[stepIndex].timingOffset;
+    const float offset = step.getTimingOffset();
     const int tickOffset = static_cast<int>(PPQN * offset);
 
     // Handle wrapping for negative offsets
-    const int gridLength = static_cast<int>(this->length.load(std::memory_order_acquire));
+    const int gridLength = static_cast<int>(getProperty(props::length));
     const int patternLengthTicks = gridLength * gridSpacing;
+
     return (finalTick + tickOffset + patternLengthTicks) % patternLengthTicks;
 }
 
@@ -226,17 +218,21 @@ int Pattern::getStepEndTick(const size_t stepIndex) const
         return 0;
 
     const int startTick = calculateStepTick(stepIndex);
-    const int noteLengthTicks = steps[stepIndex].getNoteLengthInTicks();
+    auto step = getStepObject(stepIndex);
+    const int noteLengthTicks = step.getNoteLengthInTicks();
 
     // Handle pattern wrapping
-    const int gridSpacing = stepIntervalToTicks(this->stepInterval.load(std::memory_order_acquire));
-    const int gridLength = static_cast<int>(this->length.load(std::memory_order_acquire));
+    const int gridSpacing = stepIntervalToTicks(getProperty(props::stepInterval));
+    const int gridLength = static_cast<int>(getProperty(props::length));
     const int patternLengthTicks = gridLength * gridSpacing;
     return (startTick + noteLengthTicks) % patternLengthTicks;
 }
 
 void Pattern::updateStepTiming(const size_t stepIndex, bool acquireLock)
 {
+    if (stepIndex >= MAX_STEPS)
+        return;
+
     std::unique_ptr<std::lock_guard<std::mutex>> lock;
     if (acquireLock)
     {
@@ -252,7 +248,7 @@ void Pattern::updateStepTiming(const size_t stepIndex, bool acquireLock)
     workingBuffer.tickToStep = triggerBuffers[current].tickToStep;
     workingBuffer.stepToTick = triggerBuffers[current].stepToTick;
 
-    if (steps[stepIndex].enabled)
+    if (isStepEnabled(stepIndex))
     {
         int finalTick = calculateStepTick(stepIndex);
         workingBuffer.addStep(finalTick, stepIndex);
@@ -266,6 +262,23 @@ void Pattern::updateStepTiming(const size_t stepIndex, bool acquireLock)
     assert(workingBuffer.verifyIntegrity());
     workingBuffer.dirty.store(true, std::memory_order_release);
     this->activeBuffer.store(inactive, std::memory_order_release);
+}
+
+void Pattern::initializeStepTiming(const size_t stepIndex)
+{
+    if (stepIndex >= MAX_STEPS)
+        return;
+
+    if (isStepEnabled(stepIndex))
+    {
+        int finalTick = calculateStepTick(stepIndex);
+        triggerBuffers[0].addStep(finalTick, stepIndex);
+    }
+
+    // Mark as initialized
+    triggerBuffers[0].dirty.store(true, std::memory_order_release);
+    // Set buffer 0 as active
+    this->activeBuffer.store(0, std::memory_order_release);
 }
 
 const std::map<int, size_t>& Pattern::getTriggerMap() const

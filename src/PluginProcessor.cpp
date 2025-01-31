@@ -12,7 +12,7 @@ SirkusAudioProcessor::SirkusAudioProcessor()
 {
     while (sequencer.getTrackCount() < Sirkus::UI::TrackPanelConfig::numTracks)
     {
-        sequencer.addTrack();
+        sequencer.createTrack();
     }
 }
 

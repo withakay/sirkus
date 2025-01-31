@@ -1,16 +1,18 @@
 #pragma once
 
-#include <JuceHeader.h>
+
+#include "../JuceHeader.h"
 
 namespace Sirkus::Core {
 
+using namespace juce;
 /*
 
-ValueTreeWrapper is a base class for objects that are stored in a ValueTree. It provides
+ValueTreeObject is a base class for objects that are stored in a ValueTree. It provides
 convenience methods for setting and getting properties in the ValueTree, and automatically
 adds itself as a listener to the ValueTree.
 
-Example usage of TypedProperty and ValueTreeWrapper
+Example usage of TypedProperty and ValueTreeObject
 
 // In Identifiers.h
 namespace IDs
@@ -20,11 +22,11 @@ namespace IDs
     DECLARE_ID(bpm)
 }
 
-class MyObject : public ValueTreeWrapper
+class MyObject : public ValueTreeObject
 {
 public:
     MyObject(ValueTree parentState, UndoManager& undoManager)
-        : ValueTreeWrapper(parentState, IDs::myObject, undoManager)
+        : ValueTreeObject(parentState, IDs::myObject, undoManager)
     {
         // Set default values
         setProperty(TypedProperty<bool>{ IDs::foo }, false);
@@ -59,12 +61,15 @@ struct TypedProperty
 };
 
 #define SIRKUS_DECLARE_TYPED_PROPERTY(Type, name, defaultVal) \
-    static inline const TypedProperty<Type> name { juce::Identifier(#name), defaultVal }
+    static inline const TypedProperty<Type> name              \
+    {                                                         \
+        juce::Identifier(#name), defaultVal                   \
+    }
 
-class ValueTreeWrapper : public ValueTree::Listener
+class ValueTreeObject : public ValueTree::Listener
 {
 protected:
-    ValueTreeWrapper(ValueTree parentState, const Identifier& type, UndoManager& undoManagerToUse)
+    ValueTreeObject(ValueTree parentState, const Identifier& type, UndoManager& undoManagerToUse)
         : state(type)
           , undoManager(undoManagerToUse)
     {
@@ -72,51 +77,66 @@ protected:
         state.addListener(this);
     }
 
-    ~ValueTreeWrapper() override
+    // Copy constructor
+    ValueTreeObject(const ValueTreeObject& other)
+        : state(other.state)
+          , undoManager(other.undoManager)
+    {
+        state.addListener(this);
+    }
+
+    // Copy assignment operator
+    ValueTreeObject& operator=(const ValueTreeObject& other)
+    {
+        if (this != &other)
+        {
+            state.removeListener(this);
+            state = other.state;
+            state.addListener(this);
+        }
+        return *this;
+    }
+
+    ~ValueTreeObject() override
     {
         state.removeListener(this);
     }
 
+public:
     template <typename T>
     void setProperty(const Identifier& id, T value)
     {
-        state.setProperty(id, value, &undoManager);
+        state.setProperty(id, VariantConverter<T>::toVar(value), &undoManager);
     }
 
     template <typename T>
     void setProperty(const TypedProperty<T>& property, T value)
     {
-        state.setProperty(property.id, value, &undoManager);
+        state.setProperty(property.id, VariantConverter<T>::toVar(value), &undoManager);
     }
 
     template <typename T>
     T getProperty(const Identifier& id, T defaultValue) const
     {
-        if (!state.hasProperty(id))
-            return defaultValue;
-
-        auto var = state.getProperty(id);
-        return static_cast<T>(var);
+        auto var = state.getProperty(id, defaultValue);
+        return VariantConverter<T>::fromVar(var);
     }
 
     template <typename T>
     T getProperty(const TypedProperty<T>& property) const
     {
-        if (!state.hasProperty(property.id))
-            return property.defaultValue;
-
-        auto var = state.getProperty(property.id);
-        return static_cast<T>(var);
+        auto var = state.getProperty(property.id, VariantConverter<T>::toVar(property.defaultValue));
+        return VariantConverter<T>::fromVar(var);
     }
 
+protected:
     template <typename T>
     void initProperty(const TypedProperty<T>& property)
     {
         if (!state.hasProperty(property.id))
-            setProperty(property, property.defaultValue);
+            setProperty(property, VariantConverter<T>::toVar(property.defaultValue));
     }
 
-protected:
     ValueTree state;
     UndoManager& undoManager;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../PluginProcessor.h"
-#include <JuceHeader.h>
+#include "../JuceHeader.h"
 
 namespace Sirkus::UI {
 

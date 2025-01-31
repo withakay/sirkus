@@ -1,14 +1,16 @@
 #pragma once
 
 #include "../Constants.h"
+#include "../Identifiers.h"
 #include "Step.h"
 #include "Types.h"
+#include "ValueTreeObject.h"
 
-#include <JuceHeader.h>
-#include <array>
+#include "../JuceHeader.h"
 #include <atomic>
 #include <map>
 #include <mutex>
+#include <vector>
 
 namespace Sirkus::Core {
 
@@ -32,10 +34,21 @@ struct TriggerBuffer
     }
 };
 
-class Pattern
+class Pattern final : public ValueTreeObject
 {
 public:
-    Pattern();
+    Pattern(ValueTree parentState, UndoManager& undoManagerToUse);
+
+    // Copy constructor and assignment operator inherited from ValueTreeObject
+    Pattern(const Pattern&) = delete;
+    Pattern& operator=(const Pattern&) = delete;
+
+    struct props
+    {
+        static inline const TypedProperty<int> length{ID::Pattern::length, 16};
+        static inline const TypedProperty<float> swingAmount{ID::Pattern::swingAmount, 0.0f};
+        static inline const TypedProperty<StepInterval> stepInterval{ID::Pattern::stepInterval, StepInterval::Quarter};
+    };
 
     // Step manipulation
     void setStepEnabled(size_t stepIndex, bool enabled);
@@ -48,27 +61,39 @@ public:
     void setStepNoteLength(size_t stepIndex, NoteLength length);
 
     // Pattern parameters
-    void setLength(size_t newLength);
-    void setSwingAmount(float amount);
-    void setStepInterval(StepInterval interval);
+    void setLength(size_t newLength)
+    {
+        setProperty(props::length, static_cast<int>(newLength));
+    }
 
-    // Step access
-    const Step& getStep(size_t stepIndex) const;
+    void setSwingAmount(float amount)
+    {
+        setProperty(props::swingAmount, amount);
+    }
+
+    void setStepInterval(StepInterval interval)
+    {
+        setProperty(props::stepInterval, interval);
+    }
 
     size_t getLength() const
     {
-        return length.load(std::memory_order_acquire);
+        return static_cast<size_t>(getProperty(props::length));
     }
 
     float getSwingAmount() const
     {
-        return swingAmount.load(std::memory_order_acquire);
+        return getProperty(props::swingAmount);
     }
 
     StepInterval getStepInterval() const
     {
-        return stepInterval.load(std::memory_order_acquire);
+        return getProperty(props::stepInterval);
     }
+
+    // Step access
+    Step getStepObject(size_t stepIndex) const;
+    bool isStepEnabled(size_t stepIndex) const;
 
     // Trigger map access
     const std::map<int, size_t>& getTriggerMap() const;
@@ -78,11 +103,6 @@ public:
     int getStepEndTick(size_t stepIndex) const;
 
 private:
-    std::array<Step, MAX_STEPS> steps;
-    std::atomic<size_t> length{16};
-    std::atomic<float> swingAmount{0.0f};
-    std::atomic<StepInterval> stepInterval{StepInterval::Quarter}; // Grid spacing
-
     std::array<TriggerBuffer, 2> triggerBuffers;
     std::atomic<size_t> activeBuffer{0};
     mutable std::mutex updateMutex;
@@ -91,8 +111,9 @@ private:
     void updateStepTiming(size_t stepIndex, bool acquireLock = false); // Set acquireLock=true if no lock is held
     void initializeStepTiming(size_t stepIndex);                       // Lock-free initialization
     int calculateStepTick(size_t stepIndex) const;
+    void ensureStepExists(size_t stepIndex);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Pattern)
+    JUCE_LEAK_DETECTOR(Pattern)
 };
 
 } // namespace Sirkus::Core

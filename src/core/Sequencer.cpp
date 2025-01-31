@@ -8,69 +8,96 @@
 namespace Sirkus::Core {
 
 Sequencer::Sequencer(ValueTree parentState, UndoManager& undoManagerToUse)
-    : ValueTreeWrapper(parentState, ID::sequencer, undoManagerToUse)
+    : ValueTreeObject(parentState, ID::sequencer, undoManagerToUse)
 {
-    // Create initial track
-    addTrack();
+    // Initialize default properties
+    setProperty(props::swingAmount, 0.0f);
+
+    // Load any existing tracks from state tree
+    // for (int i = 0; i < state.getNumChildren(); ++i)
+    // {
+    //     auto trackTree = state.getChild(i);
+    //     if (trackTree.hasType(ID::track))
+    //     {
+    //         auto var = trackTree.getProperty(ID::Track::trackId);
+    //         auto trackId = static_cast<uint32_t>(var.operator int());
+    //         nextTrackId = std::max(nextTrackId, trackId + 1);
+    //         tracks.emplace_back(trackTree, undoManager, trackId);
+    //     }
+    // }
+
+    // Create initial track if none exist
+    if (tracks.empty())
+    {
+        createTrack();
+    }
 }
 
-Track* Sequencer::addTrack()
+uint32_t Sequencer::createTrack()
 {
-    if (tracks.size() >= MAX_TRACKS)
+    if (getTrackCount() >= MAX_TRACKS)
     {
-        return nullptr;
+        return 0; // Return invalid trackId
     }
 
     const uint32_t trackId = generateTrackId();
-    auto track = std::make_unique<Track>(trackId);
-
+    Track track(state, undoManager, trackId);
     // Apply global swing to pattern
-    Pattern* pattern = track->getCurrentPattern();
-    pattern->setSwingAmount(swingAmount);
-
-    // Store track and get raw pointer before moving
-    auto* rawTrack = track.get();
+    Pattern& pattern = track.getCurrentPattern();
+    pattern.setSwingAmount(getProperty(props::swingAmount));
     tracks.push_back(std::move(track));
-
-    DBG("Sequencer::addTrack(); trackId=" << std::to_string(trackId));
-
-    return rawTrack;
+    DBG("Sequencer::createTrack(); trackId=" << std::to_string(trackId));
+    return trackId;
 }
 
 bool Sequencer::removeTrack(uint32_t trackId)
 {
     // Can't remove the last track
-    if (tracks.size() <= 1)
+    if (getTrackCount() <= 1)
     {
         return false;
     }
 
     // Find track with matching ID
-    auto it = std::ranges::find_if(
-        tracks,
-        [trackId](const auto& track) {
-            return track->getId() == trackId;
-        });
-
-    if (it != tracks.end())
+    auto trackTree = state.getChildWithProperty(ID::Track::trackId, static_cast<int>(trackId));
+    if (trackTree.isValid())
     {
-        tracks.erase(it);
+        state.removeChild(trackTree, &undoManager);
+        // Remove from tracks vector
+        tracks.erase(
+            std::remove_if(
+                tracks.begin(),
+                tracks.end(),
+                [trackId](const Track& t) {
+                    return t.getId() == trackId;
+                }),
+            tracks.end());
         return true;
     }
 
     return false;
 }
 
-Track* Sequencer::getTrack(uint32_t trackId)
+const Track* Sequencer::getTrack(uint32_t trackId) const
 {
-    auto it =
-        std::find_if(
-            tracks.begin(),
-            tracks.end(),
-            [trackId](const auto& track) {
-                return track->getId() == trackId;
-            });
-    return it != tracks.end() ? it->get() : nullptr;
+    // Try to find the track in our vector
+    auto it = std::ranges::find_if(
+        tracks,
+        [trackId](const Track& t) {
+            return t.getId() == trackId;
+        });
+
+    if (it != tracks.end())
+    {
+        return &(*it);
+    }
+
+    return nullptr;
+}
+
+const std::vector<Track>& Sequencer::getTracks() const
+{
+    return tracks;
 }
 
 void Sequencer::prepare(const double sampleRate)
@@ -99,10 +126,10 @@ void Sequencer::processBlock(const juce::AudioPlayHead* playHead, const int numS
     const int numTicks = static_cast<int>(numSamples * samplesToTicks);
 
     // Process each track's steps
-    for (const auto& track : tracks)
+    for (auto track : getTracks())
     {
-        auto activeSteps = track->getActiveSteps(startTick, numTicks);
-        stepProcessor.processSteps(activeSteps, track->getTrackInfo(), globalScale, startTick, numTicks, midiOut);
+        auto activeSteps = track.getActiveSteps(startTick, numTicks);
+        stepProcessor.processSteps(activeSteps, track.getTrackInfo(), globalScale, startTick, numTicks, midiOut);
     }
 }
 
@@ -129,7 +156,6 @@ float Sequencer::getSwingAmount() const
 void Sequencer::setSwingAmount(const float amount)
 {
     setProperty(props::swingAmount, amount);
-    swingAmount = amount;
     updateTrackSwing();
 }
 
@@ -155,10 +181,15 @@ uint32_t Sequencer::generateTrackId()
 
 size_t Sequencer::getTrackCount() const
 {
-    return tracks.size();
+    size_t count = 0;
+    for (int i = 0; i < state.getNumChildren(); ++i)
+    {
+        if (state.getChild(i).hasType(ID::track))
+            count++;
+    }
+    return count;
 }
 
-// Timing Control
 TimingManager& Sequencer::getTimingManager()
 {
     return timingManager;
@@ -166,13 +197,11 @@ TimingManager& Sequencer::getTimingManager()
 
 void Sequencer::updateTrackSwing() const
 {
-    const float amount = swingAmount;
-    for (const auto& track : tracks)
+    const float amount = getProperty(props::swingAmount);
+    for (auto track : getTracks())
     {
-        if (auto* pattern = track->getCurrentPattern())
-        {
-            pattern->setSwingAmount(amount);
-        }
+        auto pattern = track.getCurrentPattern();
+        pattern.setSwingAmount(amount);
     }
 }
 

@@ -1,5 +1,5 @@
 #include "Scale.h"
-#include <JuceHeader.h>
+#include "../JuceHeader.h"
 #include <algorithm>
 
 namespace Sirkus::Core {

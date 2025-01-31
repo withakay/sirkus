@@ -1,76 +1,76 @@
 #pragma once
 
+#include "../Identifiers.h"
 #include "Pattern.h"
 #include "Types.h"
-#include <JuceHeader.h>
-#include <atomic>
+#include "ValueTreeObject.h"
+
+#include "../JuceHeader.h"
 #include <memory>
 #include <vector>
 
 namespace Sirkus::Core {
 
-class Track
+class Track final : public ValueTreeObject
 {
 public:
-    explicit Track(uint32_t id);
+    Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id);
+
+    // Copy constructor and assignment operator inherited from ValueTreeObject
+    Track(const Track&) = delete;
+    Track& operator=(const Track&) = delete;
+
+    struct props
+    {
+        static inline const TypedProperty<uint32_t> trackId{ID::Track::trackId, 0};
+        static inline const TypedProperty<uint8_t> midiChannel{ID::Track::midiChannel, 1};
+        static inline const TypedProperty<ScaleMode> scaleMode{ID::Track::scaleMode, ScaleMode::Off};
+    };
 
     // Pattern management
-    void setPattern(std::unique_ptr<Pattern> newPattern);
-
-    Pattern* getCurrentPattern()
-    {
-        return currentPattern.get();
-    }
-
-    const Pattern* getCurrentPattern() const
-    {
-        return currentPattern.get();
-    }
+    Pattern& getCurrentPattern() const;
 
     // Track properties
     uint32_t getId() const
     {
-        return trackId;
+        return getProperty(props::trackId);
     }
 
     uint8_t getMidiChannel() const
     {
-        return midiChannel.load(std::memory_order_acquire);
+        return getProperty(props::midiChannel);
     }
 
     void setMidiChannel(uint8_t channel)
     {
-        midiChannel.store(channel, std::memory_order_release);
+        setProperty(props::midiChannel, channel);
     }
 
     // Scale mode settings
     void setScaleMode(ScaleMode mode)
     {
-        scaleMode.store(mode, std::memory_order_release);
+        setProperty(props::scaleMode, mode);
     }
 
     ScaleMode getScaleMode() const
     {
-        return scaleMode.load(std::memory_order_acquire);
+        return getProperty(props::scaleMode);
     }
 
     // Get track information needed for step processing
     TrackInfo getTrackInfo() const
     {
-        return TrackInfo{trackId, getMidiChannel(), getScaleMode()};
+        return TrackInfo{getId(), getMidiChannel(), getScaleMode()};
     }
 
     // Get active steps for the current tick range
     std::vector<std::pair<int, const Step*>> getActiveSteps(int startTick, int numTicks) const;
 
 private:
-    const uint32_t trackId;
+    void ensurePatternExists();
     std::unique_ptr<Pattern> currentPattern;
 
-    std::atomic<uint8_t> midiChannel{1};
-    std::atomic<ScaleMode> scaleMode{ScaleMode::Off};
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Track)
+    JUCE_LEAK_DETECTOR(Track)
 };
 
 } // namespace Sirkus::Core

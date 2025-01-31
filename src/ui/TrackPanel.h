@@ -3,7 +3,7 @@
 #include "PatternTrack.h"
 #include "TrackPanelConfig.h"
 
-#include <JuceHeader.h>
+#include "../JuceHeader.h"
 
 namespace Sirkus::UI {
 

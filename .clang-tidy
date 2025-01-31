@@ -9,12 +9,12 @@ Checks: >
   -modernize-use-trailing-return-type,
   -llvm-*,
   -llvmlibc-*,
-  -hicpp-braces-around-statements,
+  -hicpp-*,
   -readability-identifier-naming,
-  -hicpp-avoid-magic-numbers,
   -readability-magic-numbers,
   -cppcoreguidelines-avoid-magic-numbers,
   -readability-identifier-length,
+  -readability-uppercase-literal-suffix
 
 CheckOptions:
   # Class naming
