@@ -88,7 +88,7 @@ struct VariantConverter<EnumType> \
 
 DECLARE_ENUM_VARIANT_CONVERTER(Sirkus::Core::NoteLength)
 
-DECLARE_ENUM_VARIANT_CONVERTER(Sirkus::Core::StepInterval)
+DECLARE_ENUM_VARIANT_CONVERTER(Sirkus::Core::TimeDivision)
 
 DECLARE_ENUM_VARIANT_CONVERTER(Sirkus::Core::ScaleMode)
 

@@ -27,8 +27,8 @@ public:
     // Track Management
     uint32_t createTrack();             // Returns nullptr if at MAX_TRACKS
     bool removeTrack(uint32_t trackId); // Can't remove last track
-    const Track* getTrack(uint32_t trackId) const;
-    const std::vector<Track>& getTracks() const;
+    Track& getTrack(uint32_t trackId);
+    std::vector<std::unique_ptr<Track>>& getTracks();
 
     size_t getTrackCount() const;
 
@@ -52,12 +52,12 @@ public:
 
 private:
     uint32_t generateTrackId();
-    void updateTrackSwing() const;
+    void updateTrackSwing();
 
     TimingManager timingManager;
     StepProcessor stepProcessor;
     uint32_t nextTrackId{0};
-    std::vector<Track> tracks;
+    std::vector<std::unique_ptr<Track>> tracks;
 
     Scale globalScale{Scale::Type::Major}; // Current global scale
     Scale::Type scaleType{Scale::Type::Major};
@@ -65,7 +65,7 @@ private:
     std::vector<uint8_t> globalCustomDegrees;
     double currentSampleRate{44100.0};
 
-    JUCE_LEAK_DETECTOR(Sequencer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sequencer)
 };
 
 } // namespace Sirkus::Core

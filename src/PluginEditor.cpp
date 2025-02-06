@@ -44,7 +44,7 @@ SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor& p)
     timeSignatureLabel.getProperties().set("isValue", true);
 
     // Initialize UI state from processor
-    updateTrackPanel();
+    //updateTrackPanel();
 
     // Size setup
     setSize(1000, 800);
@@ -101,351 +101,350 @@ void SirkusAudioProcessorEditor::resized()
     // Step Controls at bottom
     stepControls.setBounds(area);
 }
-
-void SirkusAudioProcessorEditor::timerCallback()
-{
-    updatePositionDisplay();
-    updateTransportDisplay();
-    updatePlaybackPosition();
-
-    // Process any new MIDI messages
-    auto messages = processorRef.getAndClearLatestMidiMessages();
-    for (const auto metadata : messages)
-    {
-        midiEventLog.logMidiMessage(metadata.getMessage());
-    }
-}
-
-void SirkusAudioProcessorEditor::updatePositionDisplay()
-{
-    auto& sequencer = processorRef.getSequencer();
-    auto& timing = sequencer.getTimingManager();
-
-    if (const auto pos = timing.getMusicalPosition())
-    {
-        juce::String posText;
-        posText << "Position: Bar " << pos->bar << " | Beat " << pos->beat << " | Tick " << static_cast<int>(pos->tick);
-        positionLabel.setText(posText, juce::dontSendNotification);
-    }
-    else
-    {
-        positionLabel.setText("Position: --", juce::dontSendNotification);
-    }
-
-    if (const auto bpm = timing.getBpm())
-    {
-        bpmLabel.setText("BPM: " + juce::String(*bpm, 1), juce::dontSendNotification);
-    }
-
-    if (const auto timeSig = timing.getTimeSignature())
-    {
-        timeSignatureLabel.setText(
-            "Time Sig: " + juce::String(timeSig->first) + "/" + juce::String(timeSig->second),
-            juce::dontSendNotification);
-    }
-}
-
-void SirkusAudioProcessorEditor::updateTransportDisplay()
-{
-    // Transport state is handled by TransportControls component
-}
-
-void SirkusAudioProcessorEditor::updatePlaybackPosition()
-{
-    auto& sequencer = processorRef.getSequencer();
-    auto& timing = sequencer.getTimingManager();
-
-    // Clear all step triggers first
-    trackPanel.clearAllTriggers();
-
-    // Early return if not playing
-    if (!timing.isPlaying())
-        return;
-
-    // Early return if no position available
-    const auto pos = timing.getMusicalPosition();
-    if (!pos)
-        return;
-
-    // Calculate total ticks once
-    const int totalTicks = ((pos->bar - 1) * 4 + (pos->beat - 1)) * Sirkus::Core::PPQN + static_cast<int>(pos->tick);
-
-    // Process each track
-    for (size_t trackIndex = 0; trackIndex < sequencer.getTrackCount(); ++trackIndex)
-    {
-        const auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex));
-        if (track == nullptr)
-            continue;
-
-        const auto* pattern = track->getCurrentPattern();
-        if (pattern == nullptr)
-            continue;
-
-        // Calculate step interval ticks
-        const int stepIntervalTicks = Sirkus::Core::stepIntervalToTicks(pattern->getStepInterval());
-        if (stepIntervalTicks <= 0) // Safeguard against division by zero
-            continue;
-
-        // Calculate current step with pattern length wrapping
-        const int patternLength = static_cast<int>(pattern->getLength());
-        int currentStep = totalTicks / stepIntervalTicks;
-
-        // Handle negative positions
-        if (currentStep < 0)
-        {
-            currentStep = patternLength + (currentStep % patternLength);
-        }
-
-        // Wrap around pattern length
-        currentStep %= patternLength;
-
-        // Pass the global step index to the track panel
-        trackPanel.setStepTriggered(static_cast<int>(trackIndex), currentStep, true);
-    }
-}
-
-void SirkusAudioProcessorEditor::updateTrackPanel()
-{
-    auto& sequencer = processorRef.getSequencer();
-
-    // Update step interval
-    if (auto* track = sequencer.getTrack(0))
-    {
-        if (auto* pattern = track->getCurrentPattern())
-        {
-            globalControls.setStepInterval(pattern->getStepInterval());
-        }
-    }
-
-    // Update MIDI channels for all tracks
-    for (size_t i = 0; i < sequencer.getTrackCount(); ++i)
-    {
-        if (auto* track = sequencer.getTrack(static_cast<uint32_t>(i)))
-        {
-            // Track IDs might not match index, so store mapping for future use
-            SIRKUS_UNUSED(track->getId());
-            SIRKUS_UNUSED(track->getMidiChannel());
-            // TODO: Update track MIDI channel in UI once selection system is
-            // implemented
-        }
-    }
-}
-
-void SirkusAudioProcessorEditor::updateSelectedSteps()
-{
-    auto& sequencer = processorRef.getSequencer();
-    const auto selectedSteps = trackPanel.getAllSelectedSteps();
-
-    if (!selectedSteps.empty())
-    {
-        // Use the first selected step to initialize the controls
-        auto [trackIndex, stepIndex] = selectedSteps[0];
-        if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-        {
-            if (auto* pattern = track->getCurrentPattern())
-            {
-                const auto& step = pattern->getStep(static_cast<size_t>(stepIndex));
-                stepControls.setNoteValue(step.note);
-                stepControls.setVelocity(step.velocity);
-                stepControls.setNoteLength(step.noteLength);
-            }
-        }
-    }
-}
-
-void SirkusAudioProcessorEditor::trackMidiChannelChanged(
-    const Sirkus::UI::TrackPanel* panel,
-    int trackIndex,
-    int newChannel) noexcept
-{
-    SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-
-    if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-    {
-        track->setMidiChannel(static_cast<uint8_t>(newChannel));
-    }
-}
-
-void SirkusAudioProcessorEditor::stepStateChanged(
-    const Sirkus::UI::TrackPanel* panel,
-    const int trackIndex,
-    const int stepIndex) noexcept
-{
-    SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-
-    if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-    {
-        if (auto* pattern = track->getCurrentPattern())
-        {
-            // Get the button's enabled state from the UI
-            if (const auto& selectedSteps = trackPanel.getSelectedStepsForTrack(trackIndex);
-                std::ranges::find(selectedSteps, stepIndex) != selectedSteps.end())
-            {
-                // Update only the enabled state, leave other properties unchanged
-                pattern->setStepEnabled(static_cast<size_t>(stepIndex), true);
-            }
-            else
-            {
-                pattern->setStepEnabled(static_cast<size_t>(stepIndex), false);
-            }
-        }
-    }
-}
-
-void SirkusAudioProcessorEditor::stepSelectionChanged(const Sirkus::UI::TrackPanel* panel) noexcept
-{
-    SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
-    updateSelectedSteps();
-}
-
-void SirkusAudioProcessorEditor::pageChanged(
-    const Sirkus::UI::TrackPanel* panel,
-    const int trackIndex,
-    const int newPage) noexcept
-{
-    SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-
-    if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-    {
-        if (auto* pattern = track->getCurrentPattern())
-        {
-            // Calculate the range of steps visible on this page
-            const int startStep = newPage * Sirkus::UI::PatternTrack::VISIBLE_STEPS;
-            const int endStep =
-                std::min(startStep + Sirkus::UI::PatternTrack::VISIBLE_STEPS, static_cast<int>(pattern->getLength()));
-
-            // Get the track and update enabled state for each visible step
-            if (auto* patternTrack = trackPanel.getTrack(trackIndex))
-            {
-                for (int i = startStep; i < endStep; ++i)
-                {
-                    const auto& step = pattern->getStep(static_cast<size_t>(i));
-                    const int visibleIndex = i - startStep;
-                    patternTrack->setStepEnabled(visibleIndex, step.enabled);
-                }
-            }
-        }
-    }
-}
-
-void SirkusAudioProcessorEditor::patternLengthChanged(
-    const Sirkus::UI::TrackPanel* panel,
-    const int trackIndex,
-    const int newLength) noexcept
-{
-    SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-
-    if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-    {
-        if (auto* pattern = track->getCurrentPattern())
-        {
-            pattern->setLength(static_cast<size_t>(newLength));
-        }
-    }
-}
-
-// StepControls::Listener implementation
-void SirkusAudioProcessorEditor::noteValueChanged(Sirkus::UI::StepControls* controls, const int newValue)
-{
-    SIRKUS_UNUSED(controls); // Will be used for control-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-
-    // Update note value for all selected steps
-    for (const auto selectedSteps = trackPanel.getAllSelectedSteps();
-         const auto& [trackIndex, stepIndex] : selectedSteps)
-    {
-        if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-        {
-            if (auto* pattern = track->getCurrentPattern())
-            {
-                pattern->setStepNote(static_cast<size_t>(stepIndex), static_cast<uint8_t>(newValue));
-            }
-        }
-    }
-}
-
-void SirkusAudioProcessorEditor::velocityChanged(Sirkus::UI::StepControls* controls, int newValue)
-{
-    SIRKUS_UNUSED(controls); // Will be used for control-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-    const auto selectedSteps = trackPanel.getAllSelectedSteps();
-
-    // Update velocity for all selected steps
-    for (const auto& [trackIndex, stepIndex] : selectedSteps)
-    {
-        if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-        {
-            if (auto* pattern = track->getCurrentPattern())
-            {
-                pattern->setStepVelocity(static_cast<size_t>(stepIndex), static_cast<uint8_t>(newValue));
-            }
-        }
-    }
-}
-
-void SirkusAudioProcessorEditor::noteLengthChanged(
-    Sirkus::UI::StepControls* controls,
-    const Sirkus::Core::NoteLength newLength)
-{
-    SIRKUS_UNUSED(controls); // Will be used for control-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-    const auto selectedSteps = trackPanel.getAllSelectedSteps();
-
-    // Update note length for all selected steps
-    for (const auto& [trackIndex, stepIndex] : selectedSteps)
-    {
-        if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
-        {
-            if (auto* pattern = track->getCurrentPattern())
-            {
-                pattern->setStepNoteLength(static_cast<size_t>(stepIndex), newLength);
-            }
-        }
-    }
-}
-
-// GlobalControls::Listener implementation
-void SirkusAudioProcessorEditor::timeSignatureChanged(
-    Sirkus::UI::GlobalControls* controls,
-    int numerator,
-    int denominator)
-{
-    SIRKUS_UNUSED(controls); // Will be used for control-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-    auto& timing = sequencer.getTimingManager();
-
-    timing.setTimeSignature(numerator, denominator);
-}
-
-void SirkusAudioProcessorEditor::stepIntervalChanged(
-    Sirkus::UI::GlobalControls* controls,
-    Sirkus::Core::StepInterval newInterval)
-{
-    SIRKUS_UNUSED(controls); // Will be used for control-specific operations
-
-    auto& sequencer = processorRef.getSequencer();
-
-    // Update step interval for all tracks' patterns
-    for (size_t i = 0; i < sequencer.getTrackCount(); ++i)
-    {
-        if (auto* track = sequencer.getTrack(static_cast<uint32_t>(i)))
-        {
-            if (auto* pattern = track->getCurrentPattern())
-            {
-                pattern->setStepInterval(newInterval);
-            }
-        }
-    }
-}
+//
+// void SirkusAudioProcessorEditor::timerCallback()
+// {
+//     updatePositionDisplay();
+//     updateTransportDisplay();
+//     updatePlaybackPosition();
+//
+//     // Process any new MIDI messages
+//     auto messages = processorRef.getAndClearLatestMidiMessages();
+//     for (const auto metadata : messages)
+//     {
+//         midiEventLog.logMidiMessage(metadata.getMessage());
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::updatePositionDisplay()
+// {
+//     auto& sequencer = processorRef.getSequencer();
+//     auto& timing = sequencer.getTimingManager();
+//
+//     if (const auto pos = timing.getMusicalPosition())
+//     {
+//         juce::String posText;
+//         posText << "Position: Bar " << pos->bar << " | Beat " << pos->beat << " | Tick " << static_cast<int>(pos->tick);
+//         positionLabel.setText(posText, juce::dontSendNotification);
+//     }
+//     else
+//     {
+//         positionLabel.setText("Position: --", juce::dontSendNotification);
+//     }
+//
+//     if (const auto bpm = timing.getBpm())
+//     {
+//         bpmLabel.setText("BPM: " + juce::String(*bpm, 1), juce::dontSendNotification);
+//     }
+//
+//     if (const auto timeSig = timing.getTimeSignature())
+//     {
+//         timeSignatureLabel.setText(
+//             "Time Sig: " + juce::String(timeSig->first) + "/" + juce::String(timeSig->second),
+//             juce::dontSendNotification);
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::updateTransportDisplay()
+// {
+//     // Transport state is handled by TransportControls component
+// }
+//
+// void SirkusAudioProcessorEditor::updatePlaybackPosition()
+// {
+//     auto& sequencer = processorRef.getSequencer();
+//     auto& timing = sequencer.getTimingManager();
+//
+//     // Clear all step triggers first
+//     trackPanel.clearAllTriggers();
+//
+//     // Early return if not playing
+//     if (!timing.isPlaying())
+//         return;
+//
+//     // Early return if no position available
+//     const auto pos = timing.getMusicalPosition();
+//     if (!pos)
+//         return;
+//
+//     // Calculate total ticks once
+//     const int totalTicks = ((pos->bar - 1) * 4 + (pos->beat - 1)) * Sirkus::Core::PPQN + static_cast<int>(pos->tick);
+//
+//     // Process each track
+//     for (size_t trackIndex = 0; trackIndex < sequencer.getTrackCount(); ++trackIndex)
+//     {
+//         const auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex));
+//         if (track == nullptr)
+//             continue;
+//
+//         const auto* pattern = track->getCurrentPattern();
+//         if (pattern == nullptr)
+//             continue;
+//
+//         // Calculate step interval ticks
+//         const int stepIntervalTicks = Sirkus::Core::stepIntervalToTicks(pattern->getStepInterval());
+//         if (stepIntervalTicks <= 0) // Safeguard against division by zero
+//             continue;
+//
+//         // Calculate current step with pattern length wrapping
+//         const int patternLength = static_cast<int>(pattern->getLength());
+//         int currentStep = totalTicks / stepIntervalTicks;
+//
+//         // Handle negative positions
+//         if (currentStep < 0)
+//         {
+//             currentStep = patternLength + (currentStep % patternLength);
+//         }
+//
+//         // Wrap around pattern length
+//         currentStep %= patternLength;
+//
+//         // Pass the global step index to the track panel
+//         trackPanel.setStepTriggered(static_cast<int>(trackIndex), currentStep, true);
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::updateTrackPanel()
+// {
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     // Update step interval
+//     if (auto* track = sequencer.getTrack(0))
+//     {
+//         if (auto* pattern = track->getCurrentPattern())
+//         {
+//             globalControls.setStepInterval(pattern->getStepInterval());
+//         }
+//     }
+//
+//     // Update MIDI channels for all tracks
+//     for (size_t i = 0; i < sequencer.getTrackCount(); ++i)
+//     {
+//         if (auto* track = sequencer.getTrack(static_cast<uint32_t>(i)))
+//         {
+//             // Track IDs might not match index, so store mapping for future use
+//             SIRKUS_UNUSED(track->getId());
+//             SIRKUS_UNUSED(track->getMidiChannel());
+//             // TODO: Update track MIDI channel in UI once selection system is
+//             // implemented
+//         }
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::updateSelectedSteps()
+// {
+//     auto& sequencer = processorRef.getSequencer();
+//     const auto selectedSteps = trackPanel.getAllSelectedSteps();
+//
+//     if (!selectedSteps.empty())
+//     {
+//         // Use the first selected step to initialize the controls
+//         auto [trackIndex, stepIndex] = selectedSteps[0];
+//         if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//         {
+//             if (auto* pattern = track->getCurrentPattern())
+//             {
+//                 const auto& step = pattern->getStep(static_cast<size_t>(stepIndex));
+//                 stepControls.setNoteValue(step.note);
+//                 stepControls.setVelocity(step.velocity);
+//                 stepControls.setNoteLength(step.noteLength);
+//             }
+//         }
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::trackMidiChannelChanged(
+//     const Sirkus::UI::TrackPanel* panel,
+//     int trackIndex,
+//     int newChannel) noexcept
+// {
+//     SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//     {
+//         track->setMidiChannel(static_cast<uint8_t>(newChannel));
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::stepStateChanged(
+//     const Sirkus::UI::TrackPanel* panel,
+//     const int trackIndex,
+//     const int stepIndex) noexcept
+// {
+//     SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//     {
+//         if (auto* pattern = track->getCurrentPattern())
+//         {
+//             // Get the button's enabled state from the UI
+//             if (const auto& selectedSteps = trackPanel.getSelectedStepsForTrack(trackIndex);
+//                 std::ranges::find(selectedSteps, stepIndex) != selectedSteps.end())
+//             {
+//                 // Update only the enabled state, leave other properties unchanged
+//                 pattern->setStepEnabled(static_cast<size_t>(stepIndex), true);
+//             }
+//             else
+//             {
+//                 pattern->setStepEnabled(static_cast<size_t>(stepIndex), false);
+//             }
+//         }
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::stepSelectionChanged(const Sirkus::UI::TrackPanel* panel) noexcept
+// {
+//     SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
+//     updateSelectedSteps();
+// }
+//
+// void SirkusAudioProcessorEditor::pageChanged(
+//     const Sirkus::UI::TrackPanel* panel,
+//     const int trackIndex,
+//     const int newPage) noexcept
+// {
+//     SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//     {
+//         if (auto* pattern = track->getCurrentPattern())
+//         {
+//             // Calculate the range of steps visible on this page
+//             const int startStep = newPage * Sirkus::UI::PatternTrack::VISIBLE_STEPS;
+//             const int endStep =
+//                 std::min(startStep + Sirkus::UI::PatternTrack::VISIBLE_STEPS, static_cast<int>(pattern->getLength()));
+//
+//             // Get the track and update enabled state for each visible step
+//             if (auto* patternTrack = trackPanel.getTrack(trackIndex))
+//             {
+//                 for (int i = startStep; i < endStep; ++i)
+//                 {
+//                     const auto& step = pattern->getStep(static_cast<size_t>(i));
+//                     const int visibleIndex = i - startStep;
+//                     patternTrack->setStepEnabled(visibleIndex, step.enabled);
+//                 }
+//             }
+//         }
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::patternLengthChanged(
+//     const Sirkus::UI::TrackPanel* panel,
+//     const int trackIndex,
+//     const int newLength) noexcept
+// {
+//     SIRKUS_UNUSED(panel); // Will be used for future panel-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//     {
+//         if (auto* pattern = track->getCurrentPattern())
+//         {
+//             pattern->setLength(static_cast<size_t>(newLength));
+//         }
+//     }
+// }
+//
+// // StepControls::Listener implementation
+// void SirkusAudioProcessorEditor::noteValueChanged(Sirkus::UI::StepControls* controls, const int newValue)
+// {
+//     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     // Update note value for all selected steps
+//     for (const auto selectedSteps = trackPanel.getAllSelectedSteps();
+//          const auto& [trackIndex, stepIndex] : selectedSteps)
+//     {
+//         if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//         {
+//             if (auto* pattern = track->getCurrentPattern())
+//             {
+//                 pattern->setStepNote(static_cast<size_t>(stepIndex), static_cast<uint8_t>(newValue));
+//             }
+//         }
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::velocityChanged(Sirkus::UI::StepControls* controls, int newValue)
+// {
+//     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//     const auto selectedSteps = trackPanel.getAllSelectedSteps();
+//
+//     // Update velocity for all selected steps
+//     for (const auto& [trackIndex, stepIndex] : selectedSteps)
+//     {
+//         if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//         {
+//             if (auto* pattern = track->getCurrentPattern())
+//             {
+//                 pattern->setStepVelocity(static_cast<size_t>(stepIndex), static_cast<uint8_t>(newValue));
+//             }
+//         }
+//     }
+// }
+//
+// void SirkusAudioProcessorEditor::noteLengthChanged(
+//     Sirkus::UI::StepControls* controls,
+//     const Sirkus::Core::NoteLength newLength)
+// {
+//     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//     const auto selectedSteps = trackPanel.getAllSelectedSteps();
+//
+//     // Update note length for all selected steps
+//     for (const auto& [trackIndex, stepIndex] : selectedSteps)
+//     {
+//         if (auto* track = sequencer.getTrack(static_cast<uint32_t>(trackIndex)))
+//         {
+//             if (auto* pattern = track->getCurrentPattern())
+//             {
+//                 pattern->setStepNoteLength(static_cast<size_t>(stepIndex), newLength);
+//             }
+//         }
+//     }
+// }
+//
+// // GlobalControls::Listener implementation
+// void SirkusAudioProcessorEditor::timeSignatureChanged(
+//     Sirkus::UI::GlobalControls* controls,
+//     int numerator,
+//     int denominator)
+// {
+//     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//     auto& timing = sequencer.getTimingManager();
+//
+//     timing.setTimeSignature(numerator, denominator);
+// }
+//
+// void SirkusAudioProcessorEditor::stepIntervalChanged(
+//     Sirkus::UI::GlobalControls* controls,
+//     Sirkus::Core::StepInterval newInterval)
+// {
+//     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
+//
+//     auto& sequencer = processorRef.getSequencer();
+//
+//     // Update step interval for all tracks' patterns
+//     for (size_t i = 0; i < sequencer.getTrackCount(); ++i)
+//     {
+//         if (const Sirkus::Core::Track* track = sequencer.getTrack(static_cast<uint32_t>(i)))
+//         {
+//             Sirkus::Core::Pattern& pattern = track->getCurrentPattern();
+//             pattern.setStepInterval(newInterval);
+//
+//         }
+//     }
+// }

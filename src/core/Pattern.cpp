@@ -1,231 +1,141 @@
 #include "Pattern.h"
 
+#include "../Identifiers.h"
+#include "../JuceHeader.h"
+#include "/Users/jack/code/temp/sirkus/src/Constants.h"
+#include "Step.h"
+#include "Types.h"
+#include "ValueTreeObject.h"
+#include "juce_core/system/juce_PlatformDefs.h"
+#include "juce_data_structures/juce_data_structures.h"
+
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <stdexcept>
+#include <string>
 
 namespace Sirkus::Core {
 
 using namespace Sirkus::Constants;
 
-void TriggerBuffer::addStep(int tick, size_t stepIndex)
-{
-    // Remove any existing entry for this step
-    if (const auto existing = this->stepToTick.find(stepIndex); existing != this->stepToTick.end())
-    {
-        tickToStep.erase(existing->second);
-        stepToTick.erase(existing);
-    }
-
-    // Add new mappings
-    tickToStep[tick] = stepIndex;
-    stepToTick[stepIndex] = tick;
-}
-
-void TriggerBuffer::removeStep(const size_t stepIndex)
-{
-    auto it = stepToTick.find(stepIndex);
-    if (it != stepToTick.end())
-    {
-        tickToStep.erase(it->second);
-        stepToTick.erase(it);
-    }
-}
-
-bool TriggerBuffer::verifyIntegrity() const
-{
-    if (tickToStep.size() != stepToTick.size())
-        return false;
-
-    if (!std::ranges::all_of(tickToStep, [this](const auto& pair) {
-            const auto& [tick, step] = pair;
-            auto it = stepToTick.find(step);
-            return it != stepToTick.end() && it->second == tick;
-        }))
-    {
-        return false;
-    }
-    return true;
-}
-
 Pattern::Pattern(ValueTree parentState, UndoManager& undoManagerToUse)
         : ValueTreeObject(parentState, ID::pattern, undoManagerToUse)
 {
     // Initialize default properties
-    setProperty(props::length, 16);
-    setProperty(props::swingAmount, 0.0f);
-    setProperty(props::stepInterval, StepInterval::Quarter);
+    setLength(16);
+    setSwingAmount(0.0f);
+    setStepInterval(TimeDivision::SixteenthNote);
 
     // Initialize steps
-    for (size_t i = 0; i < 16; ++i)
+    for (size_t i = 0; i < getLength(); ++i)
     {
         ensureStepExists(i);
         initializeStepTiming(i);
     }
 }
 
-void Pattern::ensureStepExists(size_t stepIndex)
+void Pattern::ensureStepExists(const size_t stepIndex)
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
+    if (stepIndex >= getLength())
+        throw std::out_of_range("Step index out of range");
 
     if (!state.getChild(static_cast<int>(stepIndex)).isValid())
     {
-        Step step(state, undoManager);
+        // Creating a new step ensures the values are added to
+        // the ValueTree
+        steps[stepIndex] = std::make_unique<Step>(state, undoManager, static_cast<int>(stepIndex));
     }
 }
 
-Step Pattern::getStepObject(size_t stepIndex) const
+Step Pattern::getStepObject(const size_t stepIndex) const
 {
-    if (stepIndex >= MAX_STEPS)
-        return Step(ValueTree(ID::step), undoManager);
-
-    return Step(state.getChild(static_cast<int>(stepIndex)), undoManager);
+    return * steps[stepIndex];
 }
 
-bool Pattern::isStepEnabled(size_t stepIndex) const
+bool Pattern::isStepEnabled(const size_t stepIndex) const
 {
-    if (stepIndex >= MAX_STEPS)
-        return false;
-
-    auto step = getStepObject(stepIndex);
-    return step.isEnabled();
+    return steps[stepIndex]->isEnabled();
 }
 
 void Pattern::setStepEnabled(const size_t stepIndex, const bool enabled)
 {
+    // NOLINTNEXTLINE
     DBG("Pattern::setStepEnabled: " << stepIndex << " -> " << std::to_string(enabled));
-    if (stepIndex >= MAX_STEPS)
-        return;
 
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setEnabled(enabled);
-    updateStepTiming(stepIndex, true);
+    steps[stepIndex]->setEnabled(enabled);
 }
 
-void Pattern::setStepNote(const size_t stepIndex, uint8_t note)
+void Pattern::setStepNote(const size_t stepIndex, uint8_t note) const
 {
+    // NOLINTNEXTLINE
     DBG("Pattern::setStepNote: " << stepIndex << " -> " << std::to_string(note));
-    if (stepIndex >= MAX_STEPS)
-        return;
 
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setNote(note);
+    steps[stepIndex]->setNote(note);
 }
 
-void Pattern::setStepVelocity(const size_t stepIndex, uint8_t velocity)
+void Pattern::setStepVelocity(const size_t stepIndex, uint8_t velocity) const
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
-
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setVelocity(velocity);
+    steps[stepIndex]->setVelocity(velocity);
 }
 
-void Pattern::setStepProbability(const size_t stepIndex, float probability)
+void Pattern::setStepProbability(const size_t stepIndex, float probability) const
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
-
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setProbability(probability);
+    steps[stepIndex]->setProbability(probability);
 }
 
-void Pattern::setStepOffset(const size_t stepIndex, float offset)
+void Pattern::setStepOffset(const size_t stepIndex, const float offset)
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
-
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setTimingOffset(offset);
-    updateStepTiming(stepIndex, true);
+    steps[stepIndex]->setTimingOffset(offset);
 }
 
-void Pattern::setStepSwingAffected(const size_t stepIndex, bool affected)
+void Pattern::setStepSwingAffected(const size_t stepIndex, const bool affected)
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
-
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setAffectedBySwing(affected);
-    updateStepTiming(stepIndex, true);
+    steps[stepIndex]->setAffectedBySwing(affected);
 }
 
-void Pattern::setStepTrackId(const size_t stepIndex, uint32_t trackId)
+void Pattern::setStepTrackId(const size_t stepIndex, const uint32_t trackId)
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
-
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setTrackId(trackId);
+    steps[stepIndex]->setTrackId(trackId);
 }
 
 void Pattern::setStepNoteLength(const size_t stepIndex, NoteLength length)
 {
-    if (stepIndex >= MAX_STEPS)
-        return;
-
-    ensureStepExists(stepIndex);
-    auto step = getStepObject(stepIndex);
-    step.setNoteLength(length);
-}
-
-int Pattern::calculateStepTick(const size_t stepIndex) const
-{
-    if (stepIndex >= MAX_STEPS)
-        return 0;
-
-    auto step = getStepObject(stepIndex);
-
-    // Calculate base tick using step interval
-    const int gridSpacing = stepIntervalToTicks(getProperty(props::stepInterval));
-    const int baseTick = static_cast<int>(stepIndex) * gridSpacing;
-    int finalTick = baseTick;
-
-    // Apply swing if applicable
-    if (step.isAffectedBySwing() && (stepIndex % 2) != 0)
-    {
-        finalTick += static_cast<int>(PPQN * getProperty(props::swingAmount));
-    }
-
-    // Apply micro-timing offset
-    const float offset = step.getTimingOffset();
-    const int tickOffset = static_cast<int>(PPQN * offset);
-
-    // Handle wrapping for negative offsets
-    const int gridLength = static_cast<int>(getProperty(props::length));
-    const int patternLengthTicks = gridLength * gridSpacing;
-
-    return (finalTick + tickOffset + patternLengthTicks) % patternLengthTicks;
+    steps[stepIndex]->setNoteLength(length);
 }
 
 int Pattern::getStepStartTick(const size_t stepIndex) const
 {
-    if (stepIndex >= MAX_STEPS)
-        return 0;
-    return calculateStepTick(stepIndex);
+    return steps[stepIndex]->getTriggerTick();
 }
 
-int Pattern::getStepEndTick(const size_t stepIndex) const
+int Pattern::calculateStepTick(size_t stepIndex) const
 {
     if (stepIndex >= MAX_STEPS)
         return 0;
 
-    const int startTick = calculateStepTick(stepIndex);
-    auto step = getStepObject(stepIndex);
-    const int noteLengthTicks = step.getNoteLengthInTicks();
+    // Calculate base tick using step interval
+    const int gridSpacing = getStepInterval();
+    const int baseTick = static_cast<int>(stepIndex) * gridSpacing;
+    int finalTick = baseTick;
 
-    // Handle pattern wrapping
-    const int gridSpacing = stepIntervalToTicks(getProperty(props::stepInterval));
-    const int gridLength = static_cast<int>(getProperty(props::length));
+    // Apply swing if applicable
+    if (steps[stepIndex]->isAffectedBySwing() && (stepIndex % 2) != 0)
+    {
+        finalTick += static_cast<int>(PPQN * getSwingAmount());
+    }
+
+    // Apply micro-timing offset
+    const float offset = steps[stepIndex]->getTimingOffset();
+    const int tickOffset = static_cast<int>(PPQN * offset);
+
+    // Handle wrapping for negative offsets
+    const int gridLength = static_cast<int>(getLength());
     const int patternLengthTicks = gridLength * gridSpacing;
-    return (startTick + noteLengthTicks) % patternLengthTicks;
+
+    return (finalTick + tickOffset + patternLengthTicks) % patternLengthTicks;
 }
 
 void Pattern::updateStepTiming(const size_t stepIndex, bool acquireLock)
@@ -285,5 +195,4 @@ const std::map<int, size_t>& Pattern::getTriggerMap() const
 {
     return triggerBuffers[this->activeBuffer.load(std::memory_order_acquire)].tickToStep;
 }
-
 } // namespace Sirkus::Core

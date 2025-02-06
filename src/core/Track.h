@@ -16,10 +16,6 @@ class Track final : public ValueTreeObject
 public:
     Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id);
 
-    // Copy constructor and assignment operator inherited from ValueTreeObject
-    Track(const Track&) = delete;
-    Track& operator=(const Track&) = delete;
-
     struct props
     {
         static inline const TypedProperty<uint32_t> trackId{ID::Track::trackId, 0};
@@ -70,7 +66,7 @@ private:
     void ensurePatternExists();
     std::unique_ptr<Pattern> currentPattern;
 
-    JUCE_LEAK_DETECTOR(Track)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Track)
 };
 
 } // namespace Sirkus::Core

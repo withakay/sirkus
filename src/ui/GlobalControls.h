@@ -41,10 +41,10 @@ public:
     }
 
     /** Sets the step interval */
-    void setStepInterval(StepInterval interval);
+    void setStepInterval(TimeDivision interval);
 
     /** Gets the current step interval */
-    StepInterval getStepInterval() const noexcept
+    TimeDivision getStepInterval() const noexcept
     {
         return stepInterval;
     }
@@ -61,7 +61,7 @@ public:
             int denominator) = 0;
         virtual void stepIntervalChanged(
             GlobalControls* controls,
-            StepInterval newInterval) = 0;
+            TimeDivision newInterval) = 0;
     };
 
     void addListener(Listener* listener);
@@ -82,7 +82,7 @@ private:
 
     int timeSigNumerator = 4;
     int timeSigDenominator = 4;
-    StepInterval stepInterval = StepInterval::Sixteen;
+    TimeDivision stepInterval = TimeDivision::SixteenthNote;
 
     juce::ListenerList<Listener> listeners;
 

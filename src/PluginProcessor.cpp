@@ -195,7 +195,8 @@ bool SirkusAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SirkusAudioProcessor::createEditor()
 {
-    return new SirkusAudioProcessorEditor(*this);
+    // return new SirkusAudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================

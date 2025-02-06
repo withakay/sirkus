@@ -78,21 +78,17 @@ void GlobalControls::updateStepIntervalComboBox()
     stepIntervalCombo->clear(juce::dontSendNotification);
     stepIntervalCombo->addItem(
         "1/64",
-        static_cast<int>(StepInterval::Sixty4th) + 1);
+        static_cast<int>(TimeDivision::SixtyFourthNote));
     stepIntervalCombo->addItem(
         "1/32",
-        static_cast<int>(StepInterval::Thirty2nd) + 1);
+        static_cast<int>(TimeDivision::ThirtySecondNote));
     stepIntervalCombo->addItem(
         "1/16",
-        static_cast<int>(StepInterval::Sixteen) + 1);
-    stepIntervalCombo->addItem("1/8", static_cast<int>(StepInterval::Eighth) + 1);
+        static_cast<int>(TimeDivision::SixteenthNote));
+    stepIntervalCombo->addItem("1/8", static_cast<int>(StepInterval::Eighth));
     stepIntervalCombo->addItem(
         "1/4",
-        static_cast<int>(StepInterval::Quarter) + 1);
-    stepIntervalCombo->addItem("1/2", static_cast<int>(StepInterval::Half) + 1);
-    stepIntervalCombo->addItem("1", static_cast<int>(StepInterval::Whole) + 1);
-    stepIntervalCombo->addItem("2", static_cast<int>(StepInterval::TwoBars) + 1);
-    stepIntervalCombo->addItem("4", static_cast<int>(StepInterval::FourBars) + 1);
+        static_cast<int>(TimeDivision::QuarterNote));
 }
 
 void GlobalControls::setTimeSignatureNumerator(int numerator)

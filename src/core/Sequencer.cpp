@@ -1,8 +1,16 @@
 #include "Sequencer.h"
 
 #include "../Constants.h"
+#include "../JuceHeader.h"
+#include "Pattern.h"
+#include "StepProcessor.h"
+#include "TimingManager.h"
+#include "Track.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <optional>
+#include <string>
 #include <vector>
 
 namespace Sirkus::Core {
@@ -41,9 +49,9 @@ uint32_t Sequencer::createTrack()
     }
 
     const uint32_t trackId = generateTrackId();
-    Track track(state, undoManager, trackId);
+    auto track = std::make_unique<Track>(state, undoManager, trackId);
     // Apply global swing to pattern
-    Pattern& pattern = track.getCurrentPattern();
+    Pattern& pattern = track->getCurrentPattern();
     pattern.setSwingAmount(getProperty(props::swingAmount));
     tracks.push_back(std::move(track));
     DBG("Sequencer::createTrack(); trackId=" << std::to_string(trackId));
@@ -64,38 +72,30 @@ bool Sequencer::removeTrack(uint32_t trackId)
     {
         state.removeChild(trackTree, &undoManager);
         // Remove from tracks vector
-        tracks.erase(
-            std::remove_if(
-                tracks.begin(),
-                tracks.end(),
-                [trackId](const Track& t) {
-                    return t.getId() == trackId;
-                }),
-            tracks.end());
+        std::erase_if(tracks, [trackId](std::unique_ptr<Track>& t) {
+            return t->getId() == trackId;
+        });
         return true;
     }
 
     return false;
 }
 
-const Track* Sequencer::getTrack(uint32_t trackId) const
+Track& Sequencer::getTrack(const uint32_t trackId)
 {
     // Try to find the track in our vector
-    auto it = std::ranges::find_if(
-        tracks,
-        [trackId](const Track& t) {
-            return t.getId() == trackId;
-        });
-
-    if (it != tracks.end())
+    for (auto& track : tracks)
     {
-        return &(*it);
+        if (track->getId() == trackId)
+        {
+            return *track;
+        }
     }
 
-    return nullptr;
+    throw std::runtime_error("Track not found for id: " + std::to_string(trackId));
 }
 
-const std::vector<Track>& Sequencer::getTracks() const
+std::vector<std::unique_ptr<Track>>& Sequencer::getTracks()
 {
     return tracks;
 }
@@ -126,10 +126,10 @@ void Sequencer::processBlock(const juce::AudioPlayHead* playHead, const int numS
     const int numTicks = static_cast<int>(numSamples * samplesToTicks);
 
     // Process each track's steps
-    for (auto track : getTracks())
+    for (const auto& track : getTracks())
     {
-        auto activeSteps = track.getActiveSteps(startTick, numTicks);
-        stepProcessor.processSteps(activeSteps, track.getTrackInfo(), globalScale, startTick, numTicks, midiOut);
+        auto activeSteps = track->getActiveSteps(startTick, numTicks);
+        stepProcessor.processSteps(activeSteps, track->getTrackInfo(), globalScale, startTick, numTicks, midiOut);
     }
 }
 
@@ -195,12 +195,12 @@ TimingManager& Sequencer::getTimingManager()
     return timingManager;
 }
 
-void Sequencer::updateTrackSwing() const
+void Sequencer::updateTrackSwing()
 {
     const float amount = getProperty(props::swingAmount);
-    for (auto track : getTracks())
+    for (auto& track : getTracks())
     {
-        auto pattern = track.getCurrentPattern();
+        auto& pattern = track->getCurrentPattern();
         pattern.setSwingAmount(amount);
     }
 }

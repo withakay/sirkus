@@ -6,6 +6,7 @@
 namespace Sirkus::Core {
 
 using namespace juce;
+
 /*
 
 ValueTreeObject is a base class for objects that are stored in a ValueTree. It provides
@@ -54,8 +55,8 @@ struct TypedProperty
     const T defaultValue;
 
     TypedProperty(const juce::Identifier& identifier, T defaultVal)
-        : id(identifier)
-          , defaultValue(defaultVal)
+            : id(identifier)
+            , defaultValue(defaultVal)
     {
     }
 };
@@ -69,18 +70,27 @@ struct TypedProperty
 class ValueTreeObject : public ValueTree::Listener
 {
 protected:
-    ValueTreeObject(ValueTree parentState, const Identifier& type, UndoManager& undoManagerToUse)
-        : state(type)
-          , undoManager(undoManagerToUse)
+    ValueTreeObject(ValueTree parentState, const Identifier& type, UndoManager& undoManagerToUse, int index = -1)
+            : state(type)
+            , undoManager(undoManagerToUse)
     {
-        parentState.addChild(state, -1, &undoManager);
+        parentState.addChild(state, index, &undoManager);
+        state.addListener(this);
+    }
+
+    // New constructor for existing state
+    ValueTreeObject(ValueTree existingState, UndoManager& undoManagerToUse)
+            : state(existingState)
+            , undoManager(undoManagerToUse)
+    {
+        // TODO: is this a duplicate listener? Does it matter?
         state.addListener(this);
     }
 
     // Copy constructor
     ValueTreeObject(const ValueTreeObject& other)
-        : state(other.state)
-          , undoManager(other.undoManager)
+            : state(other.state)
+            , undoManager(other.undoManager)
     {
         state.addListener(this);
     }

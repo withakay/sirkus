@@ -23,18 +23,44 @@ struct TrackInfo {
   ScaleMode scaleMode;
 } __attribute__((aligned(16)));
 
-// Step interval options (grid spacing)
-enum class StepInterval {
-    Sixty4th,    // 1/64 note
-    Thirty2nd,   // 1/32 note
-    Sixteen,     // 1/16 note
-    Eighth,      // 1/8 note
-    Quarter,     // 1/4 note
-    Half,        // 1/2 note
-    Whole,       // Whole note
-    TwoBars,     // 2 bars
-    FourBars     // 4 bars
+enum TimeDivision {
+    HundredTwentyEighthNote = STEP_128TH,
+    DottedHundredTwentyEighthNote = STEP_DOTTED_128TH,
+    TripletHundredTwentyEighthNote = STEP_TRIPLET_128TH,
+
+    SixtyFourthNote = STEP_64TH,
+    DottedSixtyFourthNote = STEP_DOTTED_64TH,
+    TripletSixtyFourthNote = STEP_TRIPLET_64TH,
+
+    ThirtySecondNote = STEP_32ND,
+    DottedThirtySecondNote = STEP_DOTTED_32ND,
+    TripletThirtySecondNote = STEP_TRIPLET_32ND,
+
+    SixteenthNote = STEP_16TH,
+    DottedSixteenthNote = STEP_DOTTED_16TH,
+    TripletSixteenthNote = STEP_TRIPLET_16TH,
+
+    EighthNote = STEP_8TH,
+    DottedEighthNote = STEP_DOTTED_8TH,
+    TripletEighthNote = STEP_TRIPLET_8TH,
+
+    QuarterNote = STEP_QUARTER,
+    DottedQuarterNote = STEP_DOTTED_QUARTER,
+    TripletQuarterNote = STEP_TRIPLET_QUARTER,
+
+    HalfNote = STEP_HALF,
+    DottedHalfNote = STEP_DOTTED_HALF,
+    TripletHalfNote = STEP_TRIPLET_HALF,
+
+    WholeNote = STEP_WHOLE,
+    DottedWholeNote = STEP_DOTTED_WHOLE,
+    TripletWholeNote = STEP_TRIPLET_WHOLE,
+
+    TwoBars = STEP_TWO_BARS,
+    FourBars = STEP_FOUR_BARS
 };
+
+
 
 // Note length options
 enum class NoteLength {
@@ -53,19 +79,8 @@ enum class NoteLength {
 };
 
 // Helper function to convert StepInterval to ticks
-inline int stepIntervalToTicks(StepInterval interval) {
-    switch (interval) {
-        case StepInterval::Sixty4th: return STEP_64TH;
-        case StepInterval::Thirty2nd: return STEP_32ND;
-        case StepInterval::Sixteen: return STEP_16TH;
-        case StepInterval::Eighth: return STEP_8TH;
-        case StepInterval::Quarter: return STEP_QUARTER;
-        case StepInterval::Half: return STEP_HALF;
-        case StepInterval::Whole: return STEP_WHOLE;
-        case StepInterval::TwoBars: return STEP_TWO_BARS;
-        case StepInterval::FourBars: return STEP_FOUR_BARS;
-        default: return STEP_QUARTER;  // Default to quarter note
-    }
+inline int stepIntervalToTicks(TimeDivision interval) {
+    return interval;
 }
 
 // Helper function to convert NoteLength to ticks

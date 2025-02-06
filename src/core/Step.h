@@ -1,10 +1,11 @@
 #pragma once
 
 #include "../Identifiers.h"
+#include "../JuceHeader.h"
 #include "Types.h"
 #include "ValueTreeObject.h"
+#include "juce_data_structures/juce_data_structures.h"
 
-#include "../JuceHeader.h"
 #include <cstdint>
 
 namespace Sirkus::Core {
@@ -12,11 +13,13 @@ namespace Sirkus::Core {
 class Step final : public ValueTreeObject
 {
 public:
-    Step(ValueTree parentState, UndoManager& undoManagerToUse);
+    // Constructor for creating a new step that creates new ValueTree state
+    Step(ValueTree parentState, UndoManager& undoManagerToUse, int index);
 
-    // Copy constructor and assignment operator inherited from ValueTreeObject
-    Step(const Step&) = default;
-    Step& operator=(const Step&) = default;
+    // Constructor for creating a step from an existing ValueTree state
+    Step(ValueTree existingState, UndoManager& undoManagerToUse, bool useExistingState);
+
+    ~Step() override = default;
 
     struct props
     {
@@ -37,7 +40,7 @@ public:
         return getProperty(props::enabled);
     }
 
-    void setEnabled(bool value)
+    void setEnabled(const bool value)
     {
         setProperty(props::enabled, value);
     }
@@ -47,7 +50,7 @@ public:
         return getProperty(props::note);
     }
 
-    void setNote(uint8_t value)
+    void setNote(const uint8_t value)
     {
         setProperty(props::note, value);
     }
@@ -57,7 +60,7 @@ public:
         return getProperty(props::velocity);
     }
 
-    void setVelocity(uint8_t value)
+    void setVelocity(const uint8_t value)
     {
         setProperty(props::velocity, value);
     }
@@ -67,7 +70,7 @@ public:
         return getProperty(props::probability);
     }
 
-    void setProbability(float value)
+    void setProbability(const float value)
     {
         setProperty(props::probability, value);
     }
@@ -77,7 +80,7 @@ public:
         return getProperty(props::timingOffset);
     }
 
-    void setTimingOffset(float value)
+    void setTimingOffset(const float value)
     {
         setProperty(props::timingOffset, value);
     }
@@ -87,7 +90,7 @@ public:
         return getProperty(props::affectedBySwing);
     }
 
-    void setAffectedBySwing(bool value)
+    void setAffectedBySwing(const bool value)
     {
         setProperty(props::affectedBySwing, value);
     }
@@ -97,7 +100,7 @@ public:
         return getProperty(props::triggerTick);
     }
 
-    void setTriggerTick(int value)
+    void setTriggerTick(const int value)
     {
         setProperty(props::triggerTick, value);
     }
@@ -107,7 +110,7 @@ public:
         return getProperty(props::trackId);
     }
 
-    void setTrackId(uint32_t value)
+    void setTrackId(const uint32_t value)
     {
         setProperty(props::trackId, value);
     }
@@ -117,7 +120,7 @@ public:
         return getProperty(props::noteLength);
     }
 
-    void setNoteLength(NoteLength value)
+    void setNoteLength(const NoteLength value)
     {
         setProperty(props::noteLength, value);
     }

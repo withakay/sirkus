@@ -2,8 +2,8 @@
 
 namespace Sirkus::Core {
 
-Step::Step(ValueTree parentState, UndoManager& undoManagerToUse)
-        : ValueTreeObject(parentState, ID::step, undoManagerToUse)
+Step::Step(ValueTree parentState, UndoManager& undoManagerToUse, int index)
+        : ValueTreeObject(parentState, ID::step, undoManagerToUse, index)
 {
     // Initialize default properties
     setProperty(props::enabled, false);
@@ -16,5 +16,13 @@ Step::Step(ValueTree parentState, UndoManager& undoManagerToUse)
     setProperty(props::trackId, uint32_t(0));
     setProperty(props::noteLength, NoteLength::Quarter);
 }
+
+Step::Step(ValueTree existingState, UndoManager& undoManagerToUse, bool useExistingState)
+        : ValueTreeObject(existingState, undoManagerToUse)
+{
+    // Need a parameter to avoid ambiguity with the ValueTreeObject constructor
+    SIRKUS_UNUSED(useExistingState);
+}
+
 
 } // namespace Sirkus::Core

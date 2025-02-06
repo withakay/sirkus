@@ -5,11 +5,12 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 
 namespace Sirkus::Core {
 
 Track::Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id)
-    : ValueTreeObject(parentState, ID::track, undoManagerToUse)
+        : ValueTreeObject(parentState, ID::track, undoManagerToUse)
 {
     setProperty(props::trackId, id);
     setProperty(props::midiChannel, static_cast<uint8_t>(1));
@@ -18,7 +19,6 @@ Track::Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id)
     // Create initial pattern
     ensurePatternExists();
 }
-
 
 void Track::ensurePatternExists()
 {
