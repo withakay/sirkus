@@ -50,7 +50,7 @@ void Pattern::ensureStepExists(const size_t stepIndex)
     }
 }
 
-Step Pattern::getStepObject(const size_t stepIndex) const
+Step& Pattern::getStep(const size_t stepIndex) const
 {
     return * steps[stepIndex];
 }
@@ -101,7 +101,7 @@ void Pattern::setStepTrackId(const size_t stepIndex, const uint32_t trackId)
     steps[stepIndex]->setTrackId(trackId);
 }
 
-void Pattern::setStepNoteLength(const size_t stepIndex, NoteLength length)
+void Pattern::setStepNoteLength(const size_t stepIndex, TimeDivision length)
 {
     steps[stepIndex]->setNoteLength(length);
 }

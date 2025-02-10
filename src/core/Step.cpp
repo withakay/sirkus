@@ -1,4 +1,5 @@
 #include "Step.h"
+#include "Types.h"
 
 namespace Sirkus::Core {
 
@@ -14,7 +15,7 @@ Step::Step(ValueTree parentState, UndoManager& undoManagerToUse, int index)
     setProperty(props::affectedBySwing, true);
     setProperty(props::triggerTick, 0);
     setProperty(props::trackId, uint32_t(0));
-    setProperty(props::noteLength, NoteLength::Quarter);
+    setProperty(props::noteLength, TimeDivision::SixteenthNote);
 }
 
 Step::Step(ValueTree existingState, UndoManager& undoManagerToUse, bool useExistingState)

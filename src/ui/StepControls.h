@@ -41,10 +41,10 @@ public:
     }
 
     /** Sets the note length */
-    void setNoteLength(NoteLength length);
+    void setNoteLength(TimeDivision length);
 
     /** Gets the current note length */
-    NoteLength getNoteLength() const noexcept
+    TimeDivision getNoteLength() const noexcept
     {
         return noteLength;
     }
@@ -57,9 +57,7 @@ public:
         virtual ~Listener() = default;
         virtual void noteValueChanged(StepControls* controls, int newValue) = 0;
         virtual void velocityChanged(StepControls* controls, int newValue) = 0;
-        virtual void noteLengthChanged(
-            StepControls* controls,
-            NoteLength newLength) = 0;
+        virtual void noteLengthChanged(Sirkus::UI::StepControls* controls, Sirkus::Core::TimeDivision newLength) = 0;
     };
 
     void addListener(Listener* listener);
@@ -81,7 +79,7 @@ private:
 
     int noteValue = 60; // Middle C
     int velocity = 100;
-    NoteLength noteLength = NoteLength::Sixteen;
+    TimeDivision noteLength = TimeDivision::SixteenthNote;
 
     juce::ListenerList<Listener> listeners;
 

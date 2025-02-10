@@ -35,7 +35,7 @@ public:
     void setStepOffset(size_t stepIndex, float offset);
     void setStepSwingAffected(size_t stepIndex, bool affected);
     void setStepTrackId(size_t stepIndex, uint32_t trackId);
-    void setStepNoteLength(size_t stepIndex, NoteLength length);
+    void setStepNoteLength(size_t stepIndex, TimeDivision length);
 
     // Pattern parameters
     void setLength(size_t newLength)
@@ -69,7 +69,7 @@ public:
     }
 
     // Step access
-    Step getStepObject(size_t stepIndex) const;
+    Step& getStep(size_t stepIndex) const;
     bool isStepEnabled(size_t stepIndex) const;
 
     // Trigger map access
@@ -84,8 +84,8 @@ public:
             return 0;
 
         const int startTick = calculateStepTick(stepIndex);
-        auto step = getStepObject(stepIndex);
-        const int noteLengthTicks = step.getNoteLengthInTicks();
+        const auto& step = getStep(stepIndex);
+        const int noteLengthTicks = step.getNoteLength(); // TimeDivision enum values are ticks
 
         // Handle pattern wrapping
         const int gridSpacing = stepIntervalToTicks(getProperty(props::stepInterval));

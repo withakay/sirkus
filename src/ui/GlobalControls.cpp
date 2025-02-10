@@ -52,7 +52,7 @@ void GlobalControls::setupStepIntervalControls()
         juce::dontSendNotification); // Default to 1/16
     stepIntervalCombo->onChange = [this] {
         setStepInterval(
-            static_cast<StepInterval>(stepIntervalCombo->getSelectedItemIndex()));
+            static_cast<TimeDivision>(stepIntervalCombo->getSelectedItemIndex()));
     };
     addAndMakeVisible(stepIntervalCombo.get());
 }
@@ -76,19 +76,11 @@ void GlobalControls::updateTimeSignatureCombos()
 void GlobalControls::updateStepIntervalComboBox()
 {
     stepIntervalCombo->clear(juce::dontSendNotification);
-    stepIntervalCombo->addItem(
-        "1/64",
-        static_cast<int>(TimeDivision::SixtyFourthNote));
-    stepIntervalCombo->addItem(
-        "1/32",
-        static_cast<int>(TimeDivision::ThirtySecondNote));
-    stepIntervalCombo->addItem(
-        "1/16",
-        static_cast<int>(TimeDivision::SixteenthNote));
-    stepIntervalCombo->addItem("1/8", static_cast<int>(StepInterval::Eighth));
-    stepIntervalCombo->addItem(
-        "1/4",
-        static_cast<int>(TimeDivision::QuarterNote));
+    stepIntervalCombo->addItem("1/64",TimeDivision::SixtyFourthNote);
+    stepIntervalCombo->addItem("1/32",TimeDivision::ThirtySecondNote);
+    stepIntervalCombo->addItem("1/16",TimeDivision::SixteenthNote);
+    stepIntervalCombo->addItem("1/8", TimeDivision::EighthNote);
+    stepIntervalCombo->addItem("1/4",TimeDivision::QuarterNote);
 }
 
 void GlobalControls::setTimeSignatureNumerator(int numerator)
@@ -119,7 +111,7 @@ void GlobalControls::setTimeSignatureDenominator(int denominator)
     }
 }
 
-void GlobalControls::setStepInterval(StepInterval interval)
+void GlobalControls::setStepInterval(TimeDivision interval)
 {
     if (stepInterval != interval)
     {

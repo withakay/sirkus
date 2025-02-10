@@ -46,7 +46,7 @@
   - Properties:
     - Note value selector (0-127)
     - Velocity control (0-127)
-    - Note length selector (using NoteLength enum)
+    - Note length selector (using TimeDivision enum)
   - Behavior:
     - Updates when step selection changes
     - Applies changes to all selected steps

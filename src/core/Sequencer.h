@@ -29,6 +29,7 @@ public:
     bool removeTrack(uint32_t trackId); // Can't remove last track
     Track& getTrack(uint32_t trackId);
     std::vector<std::unique_ptr<Track>>& getTracks();
+    Pattern& getCurrentPatternForTrack(uint32_t trackId);
 
     size_t getTrackCount() const;
 

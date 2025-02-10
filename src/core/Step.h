@@ -31,7 +31,7 @@ public:
         static inline const TypedProperty<bool> affectedBySwing{ID::Step::affectedBySwing, true};
         static inline const TypedProperty<int> triggerTick{ID::Step::triggerTick, 0};
         static inline const TypedProperty<uint32_t> trackId{ID::Step::trackId, 0};
-        static inline const TypedProperty<NoteLength> noteLength{ID::Step::noteLength, NoteLength::Quarter};
+        static inline const TypedProperty<TimeDivision> noteLength{ID::Step::noteLength, TimeDivision::SixteenthNote};
     };
 
     // Property getters/setters
@@ -115,12 +115,12 @@ public:
         setProperty(props::trackId, value);
     }
 
-    NoteLength getNoteLength() const
+    TimeDivision getNoteLength() const
     {
         return getProperty(props::noteLength);
     }
 
-    void setNoteLength(const NoteLength value)
+    void setNoteLength(const TimeDivision value)
     {
         setProperty(props::noteLength, value);
     }
@@ -128,7 +128,7 @@ public:
     // Helper methods
     int getNoteLengthInTicks() const
     {
-        return noteLengthToTicks(getNoteLength());
+        return getNoteLength();
     }
 
 private:

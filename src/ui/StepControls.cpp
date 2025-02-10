@@ -1,4 +1,6 @@
 #include "StepControls.h"
+#include "/Users/jack/code/temp/sirkus/src/core/Types.h"
+#include "/Users/jack/code/temp/sirkus/src/core/Types.h"
 
 namespace Sirkus::UI {
 
@@ -57,7 +59,7 @@ void StepControls::setupNoteLengthControls()
         juce::dontSendNotification); // Default to 1/16
     noteLengthCombo->onChange = [this] {
         setNoteLength(
-            static_cast<NoteLength>(noteLengthCombo->getSelectedItemIndex()));
+            static_cast<TimeDivision>(noteLengthCombo->getSelectedItemIndex()));
     };
     addAndMakeVisible(noteLengthCombo.get());
 }
@@ -65,20 +67,15 @@ void StepControls::setupNoteLengthControls()
 void StepControls::updateNoteLengthComboBox()
 {
     noteLengthCombo->clear(juce::dontSendNotification);
-    noteLengthCombo->addItem(
-        "1/128",
-        static_cast<int>(NoteLength::OneTwentyEighth) + 1);
-    noteLengthCombo->addItem("1/64", static_cast<int>(NoteLength::Sixty4th) + 1);
-    noteLengthCombo->addItem("1/32", static_cast<int>(NoteLength::Thirty2nd) + 1);
-    noteLengthCombo->addItem("1/16", static_cast<int>(NoteLength::Sixteen) + 1);
-    noteLengthCombo->addItem("1/8", static_cast<int>(NoteLength::Eighth) + 1);
-    noteLengthCombo->addItem("1/4", static_cast<int>(NoteLength::Quarter) + 1);
-    noteLengthCombo->addItem("1/2", static_cast<int>(NoteLength::Half) + 1);
-    noteLengthCombo->addItem("1", static_cast<int>(NoteLength::Whole) + 1);
-    noteLengthCombo->addItem("2", static_cast<int>(NoteLength::TwoBars) + 1);
-    noteLengthCombo->addItem("4", static_cast<int>(NoteLength::FourBars) + 1);
-    noteLengthCombo->addItem("8", static_cast<int>(NoteLength::EightBars) + 1);
-    noteLengthCombo->addItem("16", static_cast<int>(NoteLength::SixteenBars) + 1);
+    noteLengthCombo->addItem("1/64", TimeDivision::SixtyFourthNote);
+    noteLengthCombo->addItem("1/32", TimeDivision::ThirtySecondNote);
+    noteLengthCombo->addItem("1/16", TimeDivision::SixteenthNote);
+    noteLengthCombo->addItem("1/8", TimeDivision::EighthNote);
+    noteLengthCombo->addItem("1/4", TimeDivision::QuarterNote);
+    noteLengthCombo->addItem("1/2", TimeDivision::HalfNote);
+    noteLengthCombo->addItem("1", TimeDivision::WholeNote);
+    noteLengthCombo->addItem("2", TimeDivision::TwoBars);
+    noteLengthCombo->addItem("4", TimeDivision::FourBars);
 }
 
 void StepControls::setNoteValue(int note)
@@ -109,7 +106,7 @@ void StepControls::setVelocity(int vel)
     }
 }
 
-void StepControls::setNoteLength(NoteLength length)
+void StepControls::setNoteLength(TimeDivision length)
 {
     if (noteLength != length)
     {

@@ -42,26 +42,26 @@ private:
     juce::Label timeSignatureLabel;
 
     // TrackPanel::Listener implementation
-    // void trackMidiChannelChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newChannel) noexcept override;
-    // void stepStateChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int stepIndex) noexcept override;
-    // void stepSelectionChanged(const Sirkus::UI::TrackPanel* panel) noexcept override;
-    // void pageChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newPage) noexcept override;
-    // void patternLengthChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newLength) noexcept override;
-    //
-    // // StepControls::Listener implementation
-    // void noteValueChanged(Sirkus::UI::StepControls* controls, int newValue) override;
-    // void velocityChanged(Sirkus::UI::StepControls* controls, int newValue) override;
-    // void noteLengthChanged(Sirkus::UI::StepControls* controls, Sirkus::Core::NoteLength newLength) override;
-    //
-    // // GlobalControls::Listener implementation
-    // void timeSignatureChanged(Sirkus::UI::GlobalControls* controls, int numerator, int denominator) override;
-    // void stepIntervalChanged(Sirkus::UI::GlobalControls* controls, Sirkus::Core::StepInterval newInterval) override;
-    //
-    // void updatePositionDisplay();
-    // void updateTransportDisplay();
-    // void updateTrackPanel();
-    // void updateSelectedSteps();
-    // void updatePlaybackPosition();
+    void trackMidiChannelChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newChannel) noexcept override;
+    void stepStateChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int stepIndex) noexcept override;
+    void stepSelectionChanged(const Sirkus::UI::TrackPanel* panel) noexcept override;
+    void pageChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newPage) noexcept override;
+    void patternLengthChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newLength) noexcept override;
+
+    // StepControls::Listener implementation
+    void noteValueChanged(Sirkus::UI::StepControls* controls, int newValue) override;
+    void velocityChanged(Sirkus::UI::StepControls* controls, int newValue) override;
+    void noteLengthChanged(Sirkus::UI::StepControls* controls, Sirkus::Core::TimeDivision newLength) override;
+
+    // GlobalControls::Listener implementation
+    void timeSignatureChanged(Sirkus::UI::GlobalControls* controls, int numerator, int denominator) override;
+    void stepIntervalChanged(Sirkus::UI::GlobalControls* controls, Sirkus::Core::TimeDivision newInterval) override;
+
+    void updatePositionDisplay();
+    void updateTransportDisplay();
+    void updateTrackPanel();
+    void updateSelectedSteps();
+    void updatePlaybackPosition();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SirkusAudioProcessorEditor)
 };

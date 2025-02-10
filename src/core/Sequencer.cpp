@@ -100,6 +100,11 @@ std::vector<std::unique_ptr<Track>>& Sequencer::getTracks()
     return tracks;
 }
 
+Pattern& Sequencer::getCurrentPatternForTrack(uint32_t trackId)
+{
+    return getTrack(trackId).getCurrentPattern();
+}
+
 void Sequencer::prepare(const double sampleRate)
 {
     currentSampleRate = sampleRate;

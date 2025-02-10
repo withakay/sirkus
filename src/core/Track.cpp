@@ -43,7 +43,7 @@ std::vector<std::pair<int, const Step*>> Track::getActiveSteps(int startTick, in
     while (it != triggers.end() && it->first < startTick + numTicks)
     {
         const auto stepIndex = it->second;
-        auto step = getCurrentPattern().getStepObject(stepIndex);
+        auto step = getCurrentPattern().getStep(stepIndex);
 
         // Only include enabled steps
         if (step.isEnabled())
