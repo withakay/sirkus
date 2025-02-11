@@ -4,9 +4,9 @@
 #include "../Identifiers.h"
 #include "../JuceHeader.h"
 #include "Step.h"
+#include "TriggerBuffer.h"
 #include "Types.h"
 #include "ValueTreeObject.h"
-#include "TriggerBuffer.h"
 
 #include <atomic>
 #include <map>
@@ -38,36 +38,12 @@ public:
     void setStepNoteLength(size_t stepIndex, TimeDivision length);
 
     // Pattern parameters
-    void setLength(size_t newLength)
-    {
-
-        setProperty(props.length, static_cast<int>(newLength));
-    }
-
-    void setSwingAmount(float amount)
-    {
-        setProperty(props.swingAmount, amount);
-    }
-
-    void setStepInterval(TimeDivision interval)
-    {
-        setProperty(props.stepInterval, interval);
-    }
-
-    size_t getLength() const
-    {
-        return static_cast<size_t>(getProperty(props.length));
-    }
-
-    float getSwingAmount() const
-    {
-        return getProperty(props.swingAmount);
-    }
-
-    TimeDivision getStepInterval() const
-    {
-        return getProperty(props.stepInterval);
-    }
+    void setLength(size_t newLength);
+    void setSwingAmount(float amount);
+    void setStepInterval(TimeDivision interval);
+    size_t getLength() const;
+    float getSwingAmount() const;
+    TimeDivision getStepInterval() const;
 
     // Step access
     Step& getStep(size_t stepIndex) const;
@@ -79,21 +55,7 @@ public:
     // Get step timing information
     int getStepStartTick(size_t stepIndex) const;
 
-    int getStepEndTick(size_t stepIndex) const
-    {
-        if (stepIndex >= MAX_STEPS)
-            return 0;
-
-        const int startTick = calculateStepTick(stepIndex);
-        const auto& step = getStep(stepIndex);
-        const int noteLengthTicks = step.getNoteLength(); // TimeDivision enum values are ticks
-
-        // Handle pattern wrapping
-        const int gridSpacing = stepIntervalToTicks(getProperty(props.stepInterval));
-        const int gridLength = static_cast<int>(getProperty(props.length));
-        const int patternLengthTicks = gridLength * gridSpacing;
-        return (startTick + noteLengthTicks) % patternLengthTicks;
-    }
+    int getStepEndTick(size_t stepIndex) const;
 
 private:
     std::array<TriggerBuffer, 2> triggerBuffers;

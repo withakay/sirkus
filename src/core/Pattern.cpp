@@ -38,6 +38,36 @@ Pattern::Pattern(ValueTree parentState, UndoManager& undoManagerToUse)
     }
 }
 
+void Pattern::setLength(size_t newLength)
+{
+    setProperty(props.length, static_cast<int>(newLength));
+}
+
+void Pattern::setSwingAmount(float amount)
+{
+    setProperty(props.swingAmount, amount);
+}
+
+void Pattern::setStepInterval(TimeDivision interval)
+{
+    setProperty(props.stepInterval, interval);
+}
+
+size_t Pattern::getLength() const
+{
+    return static_cast<size_t>(getProperty(props.length));
+}
+
+float Pattern::getSwingAmount() const
+{
+    return getProperty(props.swingAmount);
+}
+
+TimeDivision Pattern::getStepInterval() const
+{
+    return getProperty(props.stepInterval);
+}
+
 void Pattern::ensureStepExists(const size_t stepIndex)
 {
     if (stepIndex >= getLength())
@@ -110,6 +140,22 @@ void Pattern::setStepNoteLength(const size_t stepIndex, TimeDivision length)
 int Pattern::getStepStartTick(const size_t stepIndex) const
 {
     return steps[stepIndex]->getTriggerTick();
+}
+
+int Pattern::getStepEndTick(const size_t stepIndex) const
+{
+    if (stepIndex >= MAX_STEPS)
+        return 0;
+
+    const int startTick = calculateStepTick(stepIndex);
+    const auto& step = getStep(stepIndex);
+    const int noteLengthTicks = step.getNoteLength(); // TimeDivision enum values are ticks
+
+    // Handle pattern wrapping
+    const int gridSpacing = stepIntervalToTicks(getProperty(props.stepInterval));
+    const int gridLength = static_cast<int>(getProperty(props.length));
+    const int patternLengthTicks = gridLength * gridSpacing;
+    return (startTick + noteLengthTicks) % patternLengthTicks;
 }
 
 int Pattern::calculateStepTick(size_t stepIndex) const
