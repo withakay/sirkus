@@ -9,19 +9,6 @@ SirkusLookAndFeel::SirkusLookAndFeel()
     // TODO: Bundle custom fonts with the plugin for consistent look across
     // systems
 
-    #if JUCE_MAC
-    mainFont = juce::Font(juce::FontOptions("SF Pro Display", 13.0f, juce::Font::plain));
-    boldFont = juce::Font(juce::FontOptions("SF Pro Display", 13.0f, juce::Font::bold));
-    lightFont = juce::Font(juce::FontOptions("SF Pro Text", 13.0f, juce::Font::plain));
-    #elif JUCE_WINDOWS
-    mainFont = juce::Font(juce::FontOptions("Segoe UI", 13.0f, juce::Font::plain));
-    boldFont = juce::Font(juce::FontOptions("Segoe UI"", 13.0f, juce::Font::bold));
-    lightFont = juce::Font(juce::FontOptions("Segoe UI Light", 13.0f, juce::Font::plain));
-    #else
-    mainFont = juce::Font(juce::FontOptions("Liberation Sans", 13.0f, juce::Font::plain));
-    boldFont = juce::Font(juce::FontOptions("Liberation Sans", 13.0f, juce::Font::bold));
-    lightFont = juce::Font(juce::FontOptions("Liberation Sans Light", 13.0f, juce::Font::plain));
-    #endif
 
     // Set default sans-serif font
     setDefaultSansSerifTypefaceName(mainFont.getTypefaceName());

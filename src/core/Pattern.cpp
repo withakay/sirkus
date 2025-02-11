@@ -22,8 +22,8 @@ namespace Sirkus::Core {
 using namespace Sirkus::Constants;
 
 Pattern::Pattern(ValueTree parentState, UndoManager& undoManagerToUse)
-        : ValueTreeObject(parentState, ID::pattern, undoManagerToUse)
-        , props{}
+    : ValueTreeObject(parentState, ID::pattern, undoManagerToUse)
+      , props{}
 {
     // Initialize default properties
     setLength(16);
@@ -31,7 +31,9 @@ Pattern::Pattern(ValueTree parentState, UndoManager& undoManagerToUse)
     setStepInterval(TimeDivision::SixteenthNote);
 
     // Initialize steps
-    for (size_t i = 0; i < getLength(); ++i)
+    // To make life simpler, we create the maximum number of steps a pattern can have
+    // It expected that this won't ever be a huuuge number so this is fine
+    for (size_t i = 0; i < MAX_STEPS; ++i)
     {
         ensureStepExists(i);
         initializeStepTiming(i);
@@ -70,8 +72,8 @@ TimeDivision Pattern::getStepInterval() const
 
 void Pattern::ensureStepExists(const size_t stepIndex)
 {
-    if (stepIndex >= getLength())
-        throw std::out_of_range("Step index out of range");
+    if (stepIndex >= MAX_STEPS)
+        throw std::out_of_range("Step index out of range: " + std::to_string(stepIndex));
 
     if (!state.getChild(static_cast<int>(stepIndex)).isValid())
     {
@@ -83,6 +85,11 @@ void Pattern::ensureStepExists(const size_t stepIndex)
 
 Step& Pattern::getStep(const size_t stepIndex) const
 {
+    if (stepIndex >= getLength())
+        throw std::out_of_range(
+            "Step index out of range: " + std::to_string(stepIndex) + ". Pattern length: " +
+            std::to_string(getLength()));
+
     return *steps[stepIndex];
 }
 
@@ -242,4 +249,5 @@ const std::map<int, size_t>& Pattern::getTriggerMap() const
 {
     return triggerBuffers[this->activeBuffer.load(std::memory_order_acquire)].tickToStep;
 }
+
 } // namespace Sirkus::Core
