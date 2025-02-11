@@ -55,33 +55,29 @@ struct TypedProperty
     const T defaultValue;
 
     TypedProperty(const juce::Identifier& identifier, T defaultVal)
-            : id(identifier)
-            , defaultValue(defaultVal)
+        : id(identifier)
+          , defaultValue(defaultVal)
     {
     }
 };
 
-#define SIRKUS_DECLARE_TYPED_PROPERTY(Type, name, defaultVal) \
-    static inline const TypedProperty<Type> name              \
-    {                                                         \
-        juce::Identifier(#name), defaultVal                   \
-    }
 
 class ValueTreeObject : public ValueTree::Listener
 {
 protected:
     ValueTreeObject(ValueTree parentState, const Identifier& type, UndoManager& undoManagerToUse, int index = -1)
-            : state(type)
-            , undoManager(undoManagerToUse)
+        : state(type)
+          , undoManager(undoManagerToUse)
     {
         parentState.addChild(state, index, &undoManager);
         state.addListener(this);
+        DBG("State is valid: " << std::to_string(state.isValid()));
     }
 
     // New constructor for existing state
     ValueTreeObject(ValueTree existingState, UndoManager& undoManagerToUse)
-            : state(existingState)
-            , undoManager(undoManagerToUse)
+        : state(existingState)
+          , undoManager(undoManagerToUse)
     {
         // TODO: is this a duplicate listener? Does it matter?
         state.addListener(this);
@@ -89,8 +85,8 @@ protected:
 
     // Copy constructor
     ValueTreeObject(const ValueTreeObject& other)
-            : state(other.state)
-            , undoManager(other.undoManager)
+        : state(other.state)
+          , undoManager(other.undoManager)
     {
         state.addListener(this);
     }
@@ -135,6 +131,10 @@ public:
     template <typename T>
     T getProperty(const TypedProperty<T>& property) const
     {
+        if (!state.isValid())
+        {
+            throw std::runtime_error("ValueTreeObject::getProperty: state is not valid");
+        }
         auto var = state.getProperty(property.id, VariantConverter<T>::toVar(property.defaultValue));
         return VariantConverter<T>::fromVar(var);
     }

@@ -19,9 +19,9 @@ class Sequencer final : public ValueTreeObject
 public:
     Sequencer(ValueTree parentState, UndoManager& undoManagerToUse);
 
-    struct props
+    struct Properties
     {
-        static inline const TypedProperty<float> swingAmount{ID::Sequencer::swingAmount, 0.0f};
+        TypedProperty<float> swingAmount{ID::Sequencer::swingAmount, 0.0f};
     };
 
     // Track Management
@@ -52,6 +52,8 @@ public:
     const std::vector<uint8_t>& getGlobalCustomDegrees() const;
 
 private:
+    Properties props;
+
     uint32_t generateTrackId();
     void updateTrackSwing();
 

@@ -10,12 +10,10 @@
 namespace Sirkus::Core {
 
 Track::Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id)
-        : ValueTreeObject(parentState, ID::track, undoManagerToUse)
+    : ValueTreeObject(parentState, ID::track, undoManagerToUse)
+      , props{}
 {
-    setProperty(props::trackId, id);
-    setProperty(props::midiChannel, static_cast<uint8_t>(1));
-    setProperty(props::scaleMode, ScaleMode::Off);
-
+    setProperty(props.trackId, id);
     // Create initial pattern
     ensurePatternExists();
 }
@@ -43,7 +41,7 @@ std::vector<std::pair<int, const Step*>> Track::getActiveSteps(int startTick, in
     while (it != triggers.end() && it->first < startTick + numTicks)
     {
         const auto stepIndex = it->second;
-        auto step = getCurrentPattern().getStep(stepIndex);
+        auto& step = getCurrentPattern().getStep(stepIndex);
 
         // Only include enabled steps
         if (step.isEnabled())

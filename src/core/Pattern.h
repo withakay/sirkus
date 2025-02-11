@@ -20,11 +20,11 @@ class Pattern final : public ValueTreeObject
 public:
     Pattern(ValueTree parentState, UndoManager& undoManagerToUse);
 
-    struct props
+    struct Properties
     {
-        static inline const TypedProperty<int> length{ID::Pattern::length, 16};
-        static inline const TypedProperty<float> swingAmount{ID::Pattern::swingAmount, 0.0f};
-        static inline const TypedProperty<TimeDivision> stepInterval{ID::Pattern::stepInterval, TimeDivision::SixteenthNote};
+        TypedProperty<int> length{ID::Pattern::length, 16};
+        TypedProperty<float> swingAmount{ID::Pattern::swingAmount, 0.0f};
+        TypedProperty<TimeDivision> stepInterval{ID::Pattern::stepInterval, TimeDivision::SixteenthNote};
     };
 
     // Step manipulation
@@ -40,32 +40,33 @@ public:
     // Pattern parameters
     void setLength(size_t newLength)
     {
-        setProperty(props::length, static_cast<int>(newLength));
+
+        setProperty(props.length, static_cast<int>(newLength));
     }
 
     void setSwingAmount(float amount)
     {
-        setProperty(props::swingAmount, amount);
+        setProperty(props.swingAmount, amount);
     }
 
     void setStepInterval(TimeDivision interval)
     {
-        setProperty(props::stepInterval, interval);
+        setProperty(props.stepInterval, interval);
     }
 
     size_t getLength() const
     {
-        return static_cast<size_t>(getProperty(props::length));
+        return static_cast<size_t>(getProperty(props.length));
     }
 
     float getSwingAmount() const
     {
-        return getProperty(props::swingAmount);
+        return getProperty(props.swingAmount);
     }
 
     TimeDivision getStepInterval() const
     {
-        return getProperty(props::stepInterval);
+        return getProperty(props.stepInterval);
     }
 
     // Step access
@@ -88,8 +89,8 @@ public:
         const int noteLengthTicks = step.getNoteLength(); // TimeDivision enum values are ticks
 
         // Handle pattern wrapping
-        const int gridSpacing = stepIntervalToTicks(getProperty(props::stepInterval));
-        const int gridLength = static_cast<int>(getProperty(props::length));
+        const int gridSpacing = stepIntervalToTicks(getProperty(props.stepInterval));
+        const int gridLength = static_cast<int>(getProperty(props.length));
         const int patternLengthTicks = gridLength * gridSpacing;
         return (startTick + noteLengthTicks) % patternLengthTicks;
     }
@@ -98,6 +99,8 @@ private:
     std::array<TriggerBuffer, 2> triggerBuffers;
     std::atomic<size_t> activeBuffer{0};
     mutable std::mutex updateMutex;
+
+    Properties props;
 
     std::vector<std::unique_ptr<Step>> steps = std::vector<std::unique_ptr<Step>>(MAX_STEPS);
 

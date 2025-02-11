@@ -45,8 +45,7 @@ void SirkusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     const auto numSamples = buffer.getNumSamples();
 
     midiMessages.clear();
-    auto* playHead = getPlayHead();
-    if (playHead != nullptr)
+    if (const auto* playHead = getPlayHead(); playHead != nullptr)
     {
         sequencer.processBlock(playHead, numSamples, midiMessages);
 
@@ -195,8 +194,8 @@ bool SirkusAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SirkusAudioProcessor::createEditor()
 {
-    // return new SirkusAudioProcessorEditor(*this);
-    return new juce::GenericAudioProcessorEditor (*this);
+    return new SirkusAudioProcessorEditor(*this);
+    //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================

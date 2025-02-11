@@ -1,6 +1,5 @@
 #include "StepControls.h"
-#include "/Users/jack/code/temp/sirkus/src/core/Types.h"
-#include "/Users/jack/code/temp/sirkus/src/core/Types.h"
+#include "../core/Types.h"
 
 namespace Sirkus::UI {
 

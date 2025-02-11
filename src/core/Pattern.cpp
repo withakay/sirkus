@@ -1,8 +1,8 @@
 #include "Pattern.h"
 
+#include "../Constants.h"
 #include "../Identifiers.h"
 #include "../JuceHeader.h"
-#include "/Users/jack/code/temp/sirkus/src/Constants.h"
 #include "Step.h"
 #include "Types.h"
 #include "ValueTreeObject.h"
@@ -23,6 +23,7 @@ using namespace Sirkus::Constants;
 
 Pattern::Pattern(ValueTree parentState, UndoManager& undoManagerToUse)
         : ValueTreeObject(parentState, ID::pattern, undoManagerToUse)
+        , props{}
 {
     // Initialize default properties
     setLength(16);
@@ -52,7 +53,7 @@ void Pattern::ensureStepExists(const size_t stepIndex)
 
 Step& Pattern::getStep(const size_t stepIndex) const
 {
-    return * steps[stepIndex];
+    return *steps[stepIndex];
 }
 
 bool Pattern::isStepEnabled(const size_t stepIndex) const

@@ -17,9 +17,8 @@ namespace Sirkus::Core {
 
 Sequencer::Sequencer(ValueTree parentState, UndoManager& undoManagerToUse)
     : ValueTreeObject(parentState, ID::sequencer, undoManagerToUse)
+      , props{}
 {
-    // Initialize default properties
-    setProperty(props::swingAmount, 0.0f);
 
     // Load any existing tracks from state tree
     // for (int i = 0; i < state.getNumChildren(); ++i)
@@ -52,9 +51,16 @@ uint32_t Sequencer::createTrack()
     auto track = std::make_unique<Track>(state, undoManager, trackId);
     // Apply global swing to pattern
     Pattern& pattern = track->getCurrentPattern();
-    pattern.setSwingAmount(getProperty(props::swingAmount));
+    pattern.setSwingAmount(getProperty(props.swingAmount));
     tracks.push_back(std::move(track));
     DBG("Sequencer::createTrack(); trackId=" << std::to_string(trackId));
+    DBG("Pattern length: " << std::to_string(tracks.back()->getCurrentPattern().getLength()));
+    for (size_t i = 0; i < pattern.getLength(); ++i)
+    {
+        auto& step = pattern.getStep(i);
+        DBG("Step number: " << std::to_string(i));
+        DBG("- Step note: " << std::to_string(step.getNote()));
+    }
     return trackId;
 }
 
@@ -72,9 +78,11 @@ bool Sequencer::removeTrack(uint32_t trackId)
     {
         state.removeChild(trackTree, &undoManager);
         // Remove from tracks vector
-        std::erase_if(tracks, [trackId](std::unique_ptr<Track>& t) {
-            return t->getId() == trackId;
-        });
+        std::erase_if(
+            tracks,
+            [trackId](std::unique_ptr<Track>& t) {
+                return t->getId() == trackId;
+            });
         return true;
     }
 
@@ -84,7 +92,7 @@ bool Sequencer::removeTrack(uint32_t trackId)
 Track& Sequencer::getTrack(const uint32_t trackId)
 {
     // Try to find the track in our vector
-    for (auto& track : tracks)
+    for (const auto& track : tracks)
     {
         if (track->getId() == trackId)
         {
@@ -92,6 +100,7 @@ Track& Sequencer::getTrack(const uint32_t trackId)
         }
     }
 
+    DBG("Internal State: " << state.toXmlString());
     throw std::runtime_error("Track not found for id: " + std::to_string(trackId));
 }
 
@@ -155,12 +164,12 @@ const std::vector<uint8_t>& Sequencer::getGlobalCustomDegrees() const
 
 float Sequencer::getSwingAmount() const
 {
-    return getProperty(props::swingAmount);
+    return getProperty(props.swingAmount);
 }
 
 void Sequencer::setSwingAmount(const float amount)
 {
-    setProperty(props::swingAmount, amount);
+    setProperty(props.swingAmount, amount);
     updateTrackSwing();
 }
 
@@ -202,7 +211,7 @@ TimingManager& Sequencer::getTimingManager()
 
 void Sequencer::updateTrackSwing()
 {
-    const float amount = getProperty(props::swingAmount);
+    const float amount = getProperty(props.swingAmount);
     for (auto& track : getTracks())
     {
         auto& pattern = track->getCurrentPattern();

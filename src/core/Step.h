@@ -21,108 +21,108 @@ public:
 
     ~Step() override = default;
 
-    struct props
+    struct Properties
     {
-        static inline const TypedProperty<bool> enabled{ID::Step::enabled, false};
-        static inline const TypedProperty<uint8_t> note{ID::Step::note, 60};
-        static inline const TypedProperty<uint8_t> velocity{ID::Step::velocity, 100};
-        static inline const TypedProperty<float> probability{ID::Step::probability, 1.0f};
-        static inline const TypedProperty<float> timingOffset{ID::Step::timingOffset, 0.0f};
-        static inline const TypedProperty<bool> affectedBySwing{ID::Step::affectedBySwing, true};
-        static inline const TypedProperty<int> triggerTick{ID::Step::triggerTick, 0};
-        static inline const TypedProperty<uint32_t> trackId{ID::Step::trackId, 0};
-        static inline const TypedProperty<TimeDivision> noteLength{ID::Step::noteLength, TimeDivision::SixteenthNote};
+        TypedProperty<bool> enabled{ID::Step::enabled, false};
+        TypedProperty<uint8_t> note{ID::Step::note, 60};
+        TypedProperty<uint8_t> velocity{ID::Step::velocity, 100};
+        TypedProperty<float> probability{ID::Step::probability, 1.0f};
+        TypedProperty<float> timingOffset{ID::Step::timingOffset, 0.0f};
+        TypedProperty<bool> affectedBySwing{ID::Step::affectedBySwing, true};
+        TypedProperty<int> triggerTick{ID::Step::triggerTick, 0};
+        TypedProperty<uint32_t> trackId{ID::Step::trackId, 0};
+        TypedProperty<TimeDivision> noteLength{ID::Step::noteLength, TimeDivision::SixteenthNote};
     };
 
     // Property getters/setters
     bool isEnabled() const
     {
-        return getProperty(props::enabled);
+        return getProperty(props.enabled);
     }
 
     void setEnabled(const bool value)
     {
-        setProperty(props::enabled, value);
+        setProperty(props.enabled, value);
     }
 
     uint8_t getNote() const
     {
-        return getProperty(props::note);
+        return getProperty(props.note);
     }
 
     void setNote(const uint8_t value)
     {
-        setProperty(props::note, value);
+        setProperty(props.note, value);
     }
 
     uint8_t getVelocity() const
     {
-        return getProperty(props::velocity);
+        return getProperty(props.velocity);
     }
 
     void setVelocity(const uint8_t value)
     {
-        setProperty(props::velocity, value);
+        setProperty(props.velocity, value);
     }
 
     float getProbability() const
     {
-        return getProperty(props::probability);
+        return getProperty(props.probability);
     }
 
     void setProbability(const float value)
     {
-        setProperty(props::probability, value);
+        setProperty(props.probability, value);
     }
 
     float getTimingOffset() const
     {
-        return getProperty(props::timingOffset);
+        return getProperty(props.timingOffset);
     }
 
     void setTimingOffset(const float value)
     {
-        setProperty(props::timingOffset, value);
+        setProperty(props.timingOffset, value);
     }
 
     bool isAffectedBySwing() const
     {
-        return getProperty(props::affectedBySwing);
+        return getProperty(props.affectedBySwing);
     }
 
     void setAffectedBySwing(const bool value)
     {
-        setProperty(props::affectedBySwing, value);
+        setProperty(props.affectedBySwing, value);
     }
 
     int getTriggerTick() const
     {
-        return getProperty(props::triggerTick);
+        return getProperty(props.triggerTick);
     }
 
     void setTriggerTick(const int value)
     {
-        setProperty(props::triggerTick, value);
+        setProperty(props.triggerTick, value);
     }
 
     uint32_t getTrackId() const
     {
-        return getProperty(props::trackId);
+        return getProperty(props.trackId);
     }
 
     void setTrackId(const uint32_t value)
     {
-        setProperty(props::trackId, value);
+        setProperty(props.trackId, value);
     }
 
     TimeDivision getNoteLength() const
     {
-        return getProperty(props::noteLength);
+        return getProperty(props.noteLength);
     }
 
     void setNoteLength(const TimeDivision value)
     {
-        setProperty(props::noteLength, value);
+        setProperty(props.noteLength, value);
     }
 
     // Helper methods
@@ -132,6 +132,7 @@ public:
     }
 
 private:
+    Properties props;
     JUCE_LEAK_DETECTOR(Step)
 };
 

@@ -16,11 +16,11 @@ class Track final : public ValueTreeObject
 public:
     Track(ValueTree parentState, UndoManager& undoManagerToUse, uint32_t id);
 
-    struct props
+    struct Properties
     {
-        static inline const TypedProperty<uint32_t> trackId{ID::Track::trackId, 0};
-        static inline const TypedProperty<uint8_t> midiChannel{ID::Track::midiChannel, 1};
-        static inline const TypedProperty<ScaleMode> scaleMode{ID::Track::scaleMode, ScaleMode::Off};
+        TypedProperty<uint32_t> trackId{ID::Track::trackId, 0};
+        TypedProperty<uint8_t> midiChannel{ID::Track::midiChannel, 1};
+        TypedProperty<ScaleMode> scaleMode{ID::Track::scaleMode, ScaleMode::Off};
     };
 
     // Pattern management
@@ -29,28 +29,28 @@ public:
     // Track properties
     uint32_t getId() const
     {
-        return getProperty(props::trackId);
+        return getProperty(props.trackId);
     }
 
     uint8_t getMidiChannel() const
     {
-        return getProperty(props::midiChannel);
+        return getProperty(props.midiChannel);
     }
 
     void setMidiChannel(uint8_t channel)
     {
-        setProperty(props::midiChannel, channel);
+        setProperty(props.midiChannel, channel);
     }
 
     // Scale mode settings
     void setScaleMode(ScaleMode mode)
     {
-        setProperty(props::scaleMode, mode);
+        setProperty(props.scaleMode, mode);
     }
 
     ScaleMode getScaleMode() const
     {
-        return getProperty(props::scaleMode);
+        return getProperty(props.scaleMode);
     }
 
     // Get track information needed for step processing
@@ -63,6 +63,8 @@ public:
     std::vector<std::pair<int, const Step*>> getActiveSteps(int startTick, int numTicks) const;
 
 private:
+    Properties props;
+
     void ensurePatternExists();
     std::unique_ptr<Pattern> currentPattern;
 
