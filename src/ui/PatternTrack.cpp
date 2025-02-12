@@ -2,7 +2,8 @@
 
 namespace Sirkus::UI {
 
-PatternTrack::PatternTrack()
+PatternTrack::PatternTrack(int trackNum)
+    : trackNumber(trackNum)
 {
     // Create MIDI channel selector
     midiChannelSelector = std::make_unique<juce::ComboBox>();
@@ -10,12 +11,15 @@ PatternTrack::PatternTrack()
     for (int i = 1; i <= 16; ++i)
         midiChannelSelector->addItem(juce::String(i), i + 1);
     midiChannelSelector->setSelectedId(1, juce::dontSendNotification);
-    midiChannelSelector->onChange = [this] { setMidiChannel(midiChannelSelector->getSelectedId() - 2); };
+    midiChannelSelector->onChange = [this] {
+        setMidiChannel(midiChannelSelector->getSelectedId() - 2);
+    };
     addAndMakeVisible(midiChannelSelector.get());
 
     // Create track label
     trackLabel = std::make_unique<juce::Label>();
     trackLabel->setJustificationType(juce::Justification::centred);
+    trackLabel->setText("TR" + juce::String(trackNumber + 1), juce::dontSendNotification);
     addAndMakeVisible(trackLabel.get());
 
     // Create pattern length controls
@@ -35,12 +39,16 @@ PatternTrack::PatternTrack()
     // Create page navigation controls
     prevPageButton = std::make_unique<juce::TextButton>(juce::CharPointer_UTF8("\xe2\x97\x80")); // Left arrow
     prevPageButton->setColour(juce::TextButton::buttonColourId, juce::Colours::darkgrey);
-    prevPageButton->onClick = [this] { setCurrentPage(currentPage - 1); };
+    prevPageButton->onClick = [this] {
+        setCurrentPage(currentPage - 1);
+    };
     addAndMakeVisible(prevPageButton.get());
 
     nextPageButton = std::make_unique<juce::TextButton>(juce::CharPointer_UTF8("\xe2\x96\xb6")); // Right arrow
     nextPageButton->setColour(juce::TextButton::buttonColourId, juce::Colours::darkgrey);
-    nextPageButton->onClick = [this] { setCurrentPage(currentPage + 1); };
+    nextPageButton->onClick = [this] {
+        setCurrentPage(currentPage + 1);
+    };
     addAndMakeVisible(nextPageButton.get());
 
     pageLabel = std::make_unique<juce::Label>();
@@ -48,13 +56,13 @@ PatternTrack::PatternTrack()
     pageLabel->setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(pageLabel.get());
 
-    // Create step buttons
+    // Create step components
     for (int i = 0; i < VISIBLE_STEPS; ++i)
     {
-        auto button = std::make_unique<StepButton>();
-        button->addListener(this);
-        addAndMakeVisible(button.get());
-        stepButtons.push_back(std::move(button));
+        auto component = std::make_unique<StepComponent>();
+        component->addListener(this);
+        addAndMakeVisible(component.get());
+        stepComponents.push_back(std::move(component));
     }
 
     setOpaque(true);
@@ -63,8 +71,8 @@ PatternTrack::PatternTrack()
 
 PatternTrack::~PatternTrack()
 {
-    for (auto& button : stepButtons)
-        button->removeListener(this);
+    for (auto& component : stepComponents)
+        component->removeListener(this);
 }
 
 void PatternTrack::paint(juce::Graphics& g)
@@ -99,18 +107,18 @@ void PatternTrack::resized()
     nextPageButton->setBounds(pageSection.removeFromRight(40));
     pageLabel->setBounds(pageSection);
 
-    // Layout step buttons
-    const int buttonWidth = 40;
-    const int buttonHeight = 30;
-    const int buttonSpacing = 5;
+    // Layout step components
+    const int componentWidth = 40;
+    const int componentHeight = 30;
+    const int componentSpacing = 5;
 
-    bounds.reduce(buttonSpacing, buttonSpacing);
-    auto buttonBounds = bounds.withHeight(buttonHeight).withY(bounds.getCentreY() - buttonHeight / 2);
+    bounds.reduce(componentSpacing, componentSpacing);
+    auto componentBounds = bounds.withHeight(componentHeight).withY(bounds.getCentreY() - componentHeight / 2);
 
-    for (auto& button : stepButtons)
+    for (auto& component : stepComponents)
     {
-        button->setBounds(buttonBounds.withWidth(buttonWidth));
-        buttonBounds.translate(buttonWidth + buttonSpacing, 0);
+        component->setBounds(componentBounds.withWidth(componentWidth));
+        componentBounds.translate(componentWidth + componentSpacing, 0);
     }
 }
 
@@ -119,17 +127,17 @@ void PatternTrack::setMidiChannel(int channel)
     if (midiChannel != channel)
     {
         midiChannel = channel;
-        listeners.call([this](Listener& l) { l.trackMidiChannelChanged(this, midiChannel); });
+        listeners.call(
+            [this](Listener& l) {
+                l.trackMidiChannelChanged(this, midiChannel);
+            });
     }
 }
 
 void PatternTrack::setTrackNumber(int number)
 {
-    if (trackNumber != number)
-    {
-        trackNumber = number;
-        trackLabel->setText("Track " + juce::String(number + 1), juce::dontSendNotification);
-    }
+    trackNumber = number;
+    trackLabel->setText("Track " + juce::String(number + 1), juce::dontSendNotification);
 }
 
 void PatternTrack::setPatternLength(int length)
@@ -142,7 +150,10 @@ void PatternTrack::setPatternLength(int length)
         patternLengthSlider->setValue(length, juce::dontSendNotification);
         setTotalPages((patternLength + VISIBLE_STEPS - 1) / VISIBLE_STEPS);
 
-        listeners.call([this](Listener& l) { l.patternLengthChanged(this, patternLength); });
+        listeners.call(
+            [this](Listener& l) {
+                l.patternLengthChanged(this, patternLength);
+            });
     }
 }
 
@@ -153,7 +164,10 @@ void PatternTrack::setCurrentPage(int newPage)
         currentPage = newPage;
         updatePageControls();
         updateStepButtonStates();
-        listeners.call([this](Listener& l) { l.pageChanged(this, currentPage); });
+        listeners.call(
+            [this](Listener& l) {
+                l.pageChanged(this, currentPage);
+            });
     }
 }
 
@@ -177,12 +191,12 @@ void PatternTrack::updatePageControls()
 
 void PatternTrack::updateStepButtonStates()
 {
-    // Update selection state for visible buttons
+    // Update selection state for visible components
     for (int i = 0; i < VISIBLE_STEPS; ++i)
     {
         int globalIndex = currentPage * VISIBLE_STEPS + i;
         auto it = std::find(selectedStepIndices.begin(), selectedStepIndices.end(), globalIndex);
-        stepButtons[static_cast<size_t>(i)]->setSelected(it != selectedStepIndices.end());
+        stepComponents[static_cast<size_t>(i)]->getStepButton()->setSelected(it != selectedStepIndices.end());
     }
 }
 
@@ -195,8 +209,8 @@ void PatternTrack::clearStepSelection()
 
 void PatternTrack::clearAllTriggers()
 {
-    for (auto& button : stepButtons)
-        button->setTriggered(false);
+    for (auto& component : stepComponents)
+        component->getStepButton()->setTriggered(false);
 }
 
 void PatternTrack::setStepTriggered(int stepIndex, bool triggered)
@@ -209,18 +223,18 @@ void PatternTrack::setStepTriggered(int stepIndex, bool triggered)
     {
         // Convert to visible step index
         if (const int visibleStepIndex = stepIndex % VISIBLE_STEPS;
-            visibleStepIndex >= 0 && static_cast<size_t>(visibleStepIndex) < stepButtons.size())
+            visibleStepIndex >= 0 && static_cast<size_t>(visibleStepIndex) < stepComponents.size())
         {
-            stepButtons[static_cast<size_t>(visibleStepIndex)]->setTriggered(triggered);
+            stepComponents[static_cast<size_t>(visibleStepIndex)]->getStepButton()->setTriggered(triggered);
         }
     }
 }
 
 void PatternTrack::setStepEnabled(int stepIndex, bool enabled)
 {
-    if (stepIndex >= 0 && static_cast<size_t>(stepIndex) < stepButtons.size())
+    if (stepIndex >= 0 && static_cast<size_t>(stepIndex) < stepComponents.size())
     {
-        stepButtons[static_cast<size_t>(stepIndex)]->setEnabled(enabled);
+        stepComponents[static_cast<size_t>(stepIndex)]->getStepButton()->setEnabled(enabled);
     }
 }
 
@@ -232,7 +246,10 @@ void PatternTrack::stepButtonClicked(StepButton* button, const juce::ModifierKey
     if (auto index = getStepButtonIndex(button); index >= 0)
     {
         int globalIndex = currentPage * VISIBLE_STEPS + index;
-        listeners.call([this, globalIndex](Listener& l) { l.stepStateChanged(this, globalIndex); });
+        listeners.call(
+            [this, globalIndex](Listener& l) {
+                l.stepStateChanged(this, globalIndex);
+            });
     }
 }
 
@@ -241,7 +258,10 @@ void PatternTrack::stepButtonStateChanged(StepButton* button)
     if (auto index = getStepButtonIndex(button); index >= 0)
     {
         int globalIndex = currentPage * VISIBLE_STEPS + index;
-        listeners.call([this, globalIndex](Listener& l) { l.stepStateChanged(this, globalIndex); });
+        listeners.call(
+            [this, globalIndex](Listener& l) {
+                l.stepStateChanged(this, globalIndex);
+            });
     }
 }
 
@@ -304,23 +324,27 @@ void PatternTrack::selectStepRange(int fromIndex, int toIndex)
     clearStepSelection();
 
     // Select all steps in range
-    for (int i = fromIndex; i <= toIndex && i < static_cast<int>(stepButtons.size()); ++i)
+    for (int i = fromIndex; i <= toIndex && i < static_cast<int>(stepComponents.size()); ++i)
     {
         if (i >= 0)
         {
             int globalIndex = currentPage * VISIBLE_STEPS + i;
             selectedStepIndices.push_back(globalIndex);
-            stepButtons[static_cast<size_t>(i)]->setSelected(true);
+            stepComponents[static_cast<size_t>(i)]->getStepButton()->setSelected(true);
         }
     }
 }
 
 int PatternTrack::getStepButtonIndex(StepButton* button) const
 {
-    auto it =
-        std::find_if(stepButtons.begin(), stepButtons.end(), [button](const auto& ptr) { return ptr.get() == button; });
+    auto it = std::find_if(
+        stepComponents.begin(),
+        stepComponents.end(),
+        [button](const auto& ptr) {
+            return ptr->getStepButton() == button;
+        });
 
-    return it != stepButtons.end() ? static_cast<int>(std::distance(stepButtons.begin(), it)) : -1;
+    return it != stepComponents.end() ? static_cast<int>(std::distance(stepComponents.begin(), it)) : -1;
 }
 
 void PatternTrack::addListener(Listener* listener)

@@ -9,6 +9,8 @@
 
 #include "JuceHeader.h"
 
+#include <melatonin_inspector/melatonin_inspector.h>
+
 SirkusAudioProcessorEditor::SirkusAudioProcessorEditor(SirkusAudioProcessor& p)
     : AudioProcessorEditor(&p)
       , processorRef(p)
@@ -301,7 +303,9 @@ void SirkusAudioProcessorEditor::pageChanged(
 
     // Calculate the range of steps visible on this page
     const int startStep = newPage * Sirkus::UI::PatternTrack::VISIBLE_STEPS;
-    const int endStep = std::min(startStep + Sirkus::UI::PatternTrack::VISIBLE_STEPS, static_cast<int>(pattern.getLength()));
+    const int endStep = std::min(
+        startStep + Sirkus::UI::PatternTrack::VISIBLE_STEPS,
+        static_cast<int>(pattern.getLength()));
 
     // Get the track and update enabled state for each visible step
     if (auto* patternTrack = trackPanel.getTrack(trackIndex))
@@ -377,7 +381,9 @@ void SirkusAudioProcessorEditor::noteLengthChanged(
 
 // GlobalControls::Listener implementation
 void SirkusAudioProcessorEditor::timeSignatureChanged(
-    Sirkus::UI::GlobalControls* controls, const int numerator, const int denominator)
+    Sirkus::UI::GlobalControls* controls,
+    const int numerator,
+    const int denominator)
 {
     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
 
@@ -388,7 +394,8 @@ void SirkusAudioProcessorEditor::timeSignatureChanged(
 }
 
 void SirkusAudioProcessorEditor::stepIntervalChanged(
-    Sirkus::UI::GlobalControls* controls, const Sirkus::Core::TimeDivision newInterval)
+    Sirkus::UI::GlobalControls* controls,
+    const Sirkus::Core::TimeDivision newInterval)
 {
     SIRKUS_UNUSED(controls); // Will be used for control-specific operations
 

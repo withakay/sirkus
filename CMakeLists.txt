@@ -55,6 +55,7 @@ set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 # )
 
 add_subdirectory(${LIB_DIR}/juce)
+add_subdirectory(${LIB_DIR}/melatonin_inspector)
 
 # Plugin definition using juce_add_plugin
 juce_add_plugin(${PROJECT_NAME}
@@ -73,6 +74,7 @@ juce_add_plugin(${PROJECT_NAME}
         PRODUCT_NAME "${PRODUCT_NAME}"            # Simplified product name for binaries
 )
 
+target_link_libraries(${PROJECT_NAME} PRIVATE melatonin_inspector)
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
 add_library(SharedCode INTERFACE)

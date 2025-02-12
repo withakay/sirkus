@@ -14,6 +14,8 @@ set(SourceFiles
     src/ui/PatternTrack.h
     src/ui/MidiEventLog.cpp
     src/ui/SirkusLookAndFeel.h
+    src/ui/StepComponent.cpp
+    src/ui/StepComponent.h
     src/ui/GlobalControls.cpp
     src/ui/StepButton.h
     src/ui/PatternTrack.cpp

@@ -10,6 +10,8 @@
 
 #include "JuceHeader.h"
 
+#include "melatonin_inspector/melatonin_inspector.h"
+
 class SirkusAudioProcessorEditor : public juce::AudioProcessorEditor,
                                    public juce::Timer,
                                    private Sirkus::UI::TrackPanel::Listener,
@@ -40,6 +42,10 @@ private:
     juce::Label positionLabel;
     juce::Label bpmLabel;
     juce::Label timeSignatureLabel;
+
+    #if DEBUG
+    melatonin::Inspector inspector{*this};
+    #endif
 
     // TrackPanel::Listener implementation
     void trackMidiChannelChanged(const Sirkus::UI::TrackPanel* panel, int trackIndex, int newChannel) noexcept override;

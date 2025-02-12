@@ -1,13 +1,13 @@
 #pragma once
 
-#include "StepButton.h"
-
 #include "../JuceHeader.h"
+#include "StepComponent.h"
+
 #include <vector>
 
 namespace Sirkus::UI {
 
-class PatternTrack : public juce::Component, private StepButton::Listener
+class PatternTrack : public juce::Component, private StepComponent::Listener
 {
 public:
     class Listener
@@ -24,7 +24,7 @@ public:
     static constexpr int MIN_PATTERN_LENGTH = 1;
     static constexpr int MAX_PATTERN_LENGTH = 128;
 
-    PatternTrack();
+    explicit PatternTrack(int trackNumber);
     ~PatternTrack() override;
 
     void paint(juce::Graphics&) override;
@@ -78,7 +78,7 @@ public:
     void removeListener(Listener* listener);
 
 private:
-    // StepButton::Listener implementation
+    // StepComponent::Listener implementation
     void stepButtonClicked(StepButton* button, const juce::ModifierKeys& mods) override;
     void stepButtonStateChanged(StepButton* button) override;
     void stepButtonRangeSelect(StepButton* button) override;
@@ -100,11 +100,11 @@ private:
     std::unique_ptr<juce::TextButton> nextPageButton;
     std::unique_ptr<juce::Label> pageLabel;
 
-    std::vector<std::unique_ptr<StepButton>> stepButtons;
+    std::vector<std::unique_ptr<StepComponent>> stepComponents;
     std::vector<int> selectedStepIndices;
 
+    int trackNumber;
     int midiChannel{-1}; // -1 = omni
-    int trackNumber{0};
     int currentPage{0};
     int totalPages{1};
     int patternLength{16};

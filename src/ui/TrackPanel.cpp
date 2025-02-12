@@ -9,7 +9,7 @@ TrackPanel::TrackPanel()
     // Create tracks
     for (int i = 0; i < TrackPanelConfig::numTracks; ++i)
     {
-        auto track = std::make_unique<PatternTrack>();
+        auto track = std::make_unique<PatternTrack>(i);
         track->addListener(this);
         track->setTrackNumber(i);
         addAndMakeVisible(track.get());
