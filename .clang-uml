@@ -1,0 +1,15 @@
+
+add_compile_flags:
+  - -isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk/usr/include/c++/v1
+compilation_database_dir: build/ninja-debug
+output_directory: diagrams
+diagrams:
+  sirkus_class_diagram:
+    type: class
+    glob:
+      - src/core/*.cpp
+    using_namespace: Sirkus
+    exclude:
+      namespaces:
+        - juce
+        - std

@@ -110,9 +110,7 @@ void StepControls::setNoteLength(TimeDivision length)
     if (noteLength != length)
     {
         noteLength = length;
-        noteLengthCombo->setSelectedId(
-            static_cast<int>(noteLength) + 1,
-            juce::dontSendNotification);
+        noteLengthCombo->setSelectedId(static_cast<int>(noteLength) + 1, juce::dontSendNotification);
         listeners.call(
             [this](Listener& l) {
                 l.noteLengthChanged(this, noteLength);

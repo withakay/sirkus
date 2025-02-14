@@ -60,6 +60,7 @@ PatternTrack::PatternTrack(int trackNum)
     for (int i = 0; i < VISIBLE_STEPS; ++i)
     {
         auto component = std::make_unique<StepComponent>();
+        component->setStep()
         component->addListener(this);
         addAndMakeVisible(component.get());
         stepComponents.push_back(std::move(component));
@@ -109,7 +110,7 @@ void PatternTrack::resized()
 
     // Layout step components
     const int componentWidth = 40;
-    const int componentHeight = 30;
+    const int componentHeight = 100;
     const int componentSpacing = 5;
 
     bounds.reduce(componentSpacing, componentSpacing);

@@ -1,0 +1,488 @@
+classDiagram
+    class C_0010297816924814687483["::OptionsBuilder&lt;OptionsType&gt;"]
+    class C_0010297816924814687483 {
+        <<abstract>>
+        +~OptionsBuilder() : [default] void
+        +buildOptions(const OptionsType & initialOptions) : OptionsType*
+        +buildOptions() : OptionsType
+    }
+    class C_0015942621786670394164["::Steinberg::Vst::IComponent"]
+    class C_0015942621786670394164 {
+    }
+    class C_0002787097806347503156["::Steinberg::FUnknown"]
+    class C_0002787097806347503156 {
+    }
+    class C_0001012517098737117509["::ARA::ARAFactory"]
+    class C_0001012517098737117509 {
+    }
+    class C_0016821419841954520522["Core::Scale"]
+    class C_0016821419841954520522 {
+        +Scale() : void
+        +Scale(Type scaleType, uint8_t rootNote = 0) : void
+        +Scale(const std::vector&lt;uint8_t&gt; & scaleNotes, uint8_t rootNote = 0) : void
+        -applyRootToScale(const uint8_t * scale, size_t size, uint8_t root) : std::vector&lt;uint8_t&gt;$
+        +getDegrees() : [const] const std::vector&lt;uint8_t&gt; &
+        +getName() : [const] std::string
+        +getRoot() : [const] uint8_t
+        +getType() : [const] Type
+        +quantizeDown(uint8_t note) : [const] uint8_t
+        +quantizeNearest(uint8_t note) : [const] uint8_t
+        +quantizeRandom(uint8_t note) : [const] uint8_t
+        +quantizeUp(uint8_t note) : [const] uint8_t
+        +setCustomDegrees(const std::vector&lt;uint8_t&gt; & newDegrees) : void
+        +setRoot(uint8_t newRoot) : void
+        +setType(Type newType) : void
+        -updateDegrees() : void
+        +BLUES : const std::array&lt;uint8_t,6&gt;
+        +CHROMATIC : const std::array&lt;uint8_t,12&gt;
+        +DORIAN : const std::array&lt;uint8_t,7&gt;
+        +HARMONIC_MINOR : const std::array&lt;uint8_t,7&gt;
+        +LOCRIAN : const std::array&lt;uint8_t,7&gt;
+        +LYDIAN : const std::array&lt;uint8_t,7&gt;
+        +MAJOR_SCALE : const std::array&lt;uint8_t,7&gt;
+        +MELODIC_MINOR : const std::array&lt;uint8_t,7&gt;
+        +MINOR_SCALE : const std::array&lt;uint8_t,7&gt;
+        +MIXOLYDIAN : const std::array&lt;uint8_t,7&gt;
+        +PENTATONIC_MAJOR : const std::array&lt;uint8_t,5&gt;
+        +PENTATONIC_MINOR : const std::array&lt;uint8_t,5&gt;
+        +PHRYGIAN : const std::array&lt;uint8_t,7&gt;
+        -degrees : std::vector&lt;uint8_t&gt;
+        -root : uint8_t
+        -type : Type
+    }
+    class C_0003593103974725905685["Core::Scale::Type"]
+    class C_0003593103974725905685 {
+        <<enumeration>>
+        Major
+        Minor
+        HarmonicMinor
+        MelodicMinor
+        Dorian
+        Phrygian
+        Lydian
+        Mixolydian
+        Locrian
+        PentatonicMajor
+        PentatonicMinor
+        Blues
+        Chromatic
+        Custom
+    }
+    class C_0003161580071859362439["Core::ScaleMode"]
+    class C_0003161580071859362439 {
+        <<enumeration>>
+        Off
+        QuantizeUp
+        QuantizeDown
+        QuantizeRandom
+    }
+    class C_0003828068192374320393["Core::TrackInfo"]
+    class C_0003828068192374320393 {
+        +id : uint32_t
+        +midiChannel : uint8_t
+        +scaleMode : ScaleMode
+    }
+    class C_0009414825008097351890["Core::TimeDivision"]
+    class C_0009414825008097351890 {
+        <<enumeration>>
+        HundredTwentyEighthNote
+        DottedHundredTwentyEighthNote
+        TripletHundredTwentyEighthNote
+        SixtyFourthNote
+        DottedSixtyFourthNote
+        TripletSixtyFourthNote
+        ThirtySecondNote
+        DottedThirtySecondNote
+        TripletThirtySecondNote
+        SixteenthNote
+        DottedSixteenthNote
+        TripletSixteenthNote
+        EighthNote
+        DottedEighthNote
+        TripletEighthNote
+        QuarterNote
+        DottedQuarterNote
+        TripletQuarterNote
+        HalfNote
+        DottedHalfNote
+        TripletHalfNote
+        WholeNote
+        DottedWholeNote
+        TripletWholeNote
+        TwoBars
+        FourBars
+    }
+    class C_0008781438102073861438["Core::NoteLength"]
+    class C_0008781438102073861438 {
+        <<enumeration>>
+        OneTwentyEighth
+        Sixty4th
+        Thirty2nd
+        Sixteen
+        Eighth
+        Quarter
+        Half
+        Whole
+        TwoBars
+        FourBars
+        EightBars
+        SixteenBars
+    }
+    class C_0017162824566456018718["Core::MusicalPosition"]
+    class C_0017162824566456018718 {
+        +operator==(const MusicalPosition & other) : [const] bool
+        +bar : int
+        +beat : int
+        +tick : double
+    }
+    class C_0008892747186919486775["Core::TimingInfo"]
+    class C_0008892747186919486775 {
+        +fromInternalTransport(const InternalTransport & transport) : TimingInfo$
+        +fromPositionInfo(const juce::AudioPlayHead::PositionInfo & pos) : TimingInfo$
+        +bpm : std::optional&lt;double&gt;
+        +isPlaying : bool
+        +musicalPosition : std::optional&lt;MusicalPosition&gt;
+        +ppqPosition : std::optional&lt;double&gt;
+        +timeSignature : std::optional&lt;std::pair&lt;int,int&gt;&gt;
+    }
+    class C_0014923543885965065796["Core::InternalTransport"]
+    class C_0014923543885965065796 {
+        +InternalTransport() : void
+        -beatsToNextBar(const MusicalPosition & pos) : [const] double
+        +getTimingInfo() : [const] TimingInfo
+        +isPlaying() : [const] bool
+        -ppqPositionToBeats(double ppq) : [const] double
+        +prepare(double sampleRate) : void
+        +processBlock(int numSamples) : void
+        +setBpm(double newBpm) : void
+        +setPositionInBars(int bar, int beat = 1, double tick = 0.0) : void
+        +setTimeSignature(int numerator, int denominator) : void
+        +start() : void
+        +stop() : void
+        -updateMusicalPosition() : void
+        -updateTimingInfo() : void
+        -bpm : double
+        -musicalPosition : MusicalPosition
+        -playing : bool
+        -ppqPosition : double
+        -sampleRate : double
+        -samplesPerQuarterNote : double
+        -timeSigDenominator : int
+        -timeSigNumerator : int
+    }
+    class C_0007535760439577940486["Core::TimingManager"]
+    class C_0007535760439577940486 {
+        +TimingManager() : void
+        +getBpm() : [const] std::optional&lt;double&gt;
+        +getMusicalPosition() : [const] std::optional&lt;MusicalPosition&gt;
+        +getPpqPosition() : [const] std::optional&lt;double&gt;
+        +getTimeSignature() : [const] std::optional&lt;std::pair&lt;int,int&gt;&gt;
+        +isHostSyncEnabled() : [const] bool
+        +isPlaying() : [const] bool
+        +isStandaloneMode() : [const] bool
+        +prepare(double sampleRate) : void
+        +processBlock(const juce::AudioPlayHead * playHead, int numSamples) : void
+        +setBpm(double newBpm) : void
+        +setHostSyncEnabled(bool enabled) : void
+        +setPositionInBars(const int bar, const int beat = 1, const double tick = 0.0) : void
+        +setTimeSignature(int numerator, int denominator) : void
+        +start() : void
+        +stop() : void
+        -updateHostPositionInfo(const juce::AudioPlayHead::PositionInfo & pos) : void
+        -currentTiming : TimingInfo
+        -hostSyncEnabled : bool
+        -internalTransport : InternalTransport
+        -standaloneMode : bool
+    }
+    class C_0009130430079672521979["Core::StepProcessor"]
+    class C_0009130430079672521979 {
+        +StepProcessor() : void
+        -StepProcessor(const StepProcessor &) : void
+        +~StepProcessor() : void
+        -operator=(const StepProcessor &) : StepProcessor &
+        -getLeakedObjectClassName() : const char *$
+        -processStep(const Step & step, const TrackInfo & trackInfo, const Scale & scale, int triggerTick, int startTick, int numTicks, juce::MidiBuffer & midiOut) : void$
+        +processSteps(const std::vector&lt;std::pair&lt;int,const Step *&gt;&gt; & steps, const TrackInfo & trackInfo, const Scale & scale, int startTick, int numTicks, juce::MidiBuffer & midiOut) : void
+        -leakDetector41 : juce::LeakedObjectDetector&lt;StepProcessor&gt;
+    }
+    class C_0013521205381721934084["Core::TypedProperty&lt;T&gt;"]
+    class C_0013521205381721934084 {
+        +TypedProperty(const juce::Identifier & identifier, T defaultVal) : void
+        +defaultValue : const T
+        +id : const juce::Identifier
+    }
+    class C_0007678414277767949348["Core::ValueTreeObject"]
+    class C_0007678414277767949348 {
+        #ValueTreeObject(ValueTree parentState, const Identifier & type, UndoManager & undoManagerToUse, int index = -1) : void
+        #ValueTreeObject(ValueTree existingState, UndoManager & undoManagerToUse) : void
+        #ValueTreeObject(const ValueTreeObject & other) : void
+        #~ValueTreeObject() : void
+        #operator=(const ValueTreeObject & other) : ValueTreeObject &
+        +getProperty<T>(const Identifier & id, T defaultValue) : [const] T
+        +getProperty<T>(const TypedProperty&lt;T&gt; & property) : [const] T
+        #initProperty<T>(const TypedProperty&lt;T&gt; & property) : void
+        +setProperty<T>(const Identifier & id, T value) : void
+        +setProperty<T>(const TypedProperty&lt;T&gt; & property, T value) : void
+        #valueTreeChildAdded(ValueTree & parentTree, ValueTree & childWhichHasBeenAdded) : void
+        #valueTreePropertyChanged(ValueTree & treeWhosePropertyHasChanged, const Identifier & property) : void
+        #state : ValueTree
+        #undoManager : UndoManager &
+    }
+    class C_0015922229309002665142["Core::Step"]
+    class C_0015922229309002665142 {
+        +Step(ValueTree parentState, UndoManager & undoManagerToUse, int index) : void
+        +Step(ValueTree existingState, UndoManager & undoManagerToUse, bool useExistingState) : void
+        +~Step() : [default,constexpr] void
+        -getLeakedObjectClassName() : const char *$
+        +getNote() : [const] uint8_t
+        +getNoteLength() : [const] TimeDivision
+        +getNoteLengthInTicks() : [const] int
+        +getProbability() : [const] float
+        +getTimingOffset() : [const] float
+        +getTrackId() : [const] uint32_t
+        +getTriggerTick() : [const] int
+        +getVelocity() : [const] uint8_t
+        +isAffectedBySwing() : [const] bool
+        +isEnabled() : [const] bool
+        +setAffectedBySwing(const bool value) : void
+        +setEnabled(const bool value) : void
+        +setNote(const uint8_t value) : void
+        +setNoteLength(const TimeDivision value) : void
+        +setProbability(const float value) : void
+        +setTimingOffset(const float value) : void
+        +setTrackId(const uint32_t value) : void
+        +setTriggerTick(const int value) : void
+        +setVelocity(const uint8_t value) : void
+        -leakDetector136 : juce::LeakedObjectDetector&lt;Step&gt;
+        -props : Properties
+    }
+    class C_0015636944018152444051["Core::TypedProperty&lt;bool&gt;"]
+    class C_0015636944018152444051 {
+    }
+    class C_0008116854928933620944["Core::TypedProperty&lt;uint8_t&gt;"]
+    class C_0008116854928933620944 {
+    }
+    class C_0009284858280421301190["Core::TypedProperty&lt;float&gt;"]
+    class C_0009284858280421301190 {
+    }
+    class C_0006974241629215312200["Core::TypedProperty&lt;int&gt;"]
+    class C_0006974241629215312200 {
+    }
+    class C_0006970304373437225449["Core::TypedProperty&lt;uint32_t&gt;"]
+    class C_0006970304373437225449 {
+    }
+    class C_0017115289922782562586["Core::TypedProperty&lt;Core::TimeDivision&gt;"]
+    class C_0017115289922782562586 {
+    }
+    class C_0013792724424423021550["Core::Step::Properties"]
+    class C_0013792724424423021550 {
+        +affectedBySwing : TypedProperty&lt;bool&gt;
+        +enabled : TypedProperty&lt;bool&gt;
+        +note : TypedProperty&lt;uint8_t&gt;
+        +noteLength : TypedProperty&lt;TimeDivision&gt;
+        +probability : TypedProperty&lt;float&gt;
+        +timingOffset : TypedProperty&lt;float&gt;
+        +trackId : TypedProperty&lt;uint32_t&gt;
+        +triggerTick : TypedProperty&lt;int&gt;
+        +velocity : TypedProperty&lt;uint8_t&gt;
+    }
+    class C_0008651503874203565488["Core::TriggerBuffer"]
+    class C_0008651503874203565488 {
+        +operator=(const TriggerBuffer & other) : TriggerBuffer &
+        +addStep(int tick, size_t stepIndex) : void
+        +removeStep(size_t stepIndex) : void
+        +verifyIntegrity() : [const] bool
+        +dirty : std::atomic&lt;bool&gt;
+        +stepToTick : std::map&lt;size_t,int&gt;
+        +tickToStep : std::map&lt;int,size_t&gt;
+    }
+    class C_0003463039508841737728["Core::Pattern"]
+    class C_0003463039508841737728 {
+        +Pattern(ValueTree parentState, UndoManager & undoManagerToUse) : void
+        -calculateStepTick(size_t stepIndex) : [const] int
+        -ensureStepExists(size_t stepIndex) : void
+        -getLeakedObjectClassName() : const char *$
+        +getLength() : [const] size_t
+        +getStep(size_t stepIndex) : [const] Step &
+        +getStepEndTick(size_t stepIndex) : [const] int
+        +getStepInterval() : [const] TimeDivision
+        +getStepStartTick(size_t stepIndex) : [const] int
+        +getSwingAmount() : [const] float
+        +getTriggerMap() : [const] const std::map&lt;int,size_t&gt; &
+        -initializeStepTiming(size_t stepIndex) : void
+        +isStepEnabled(size_t stepIndex) : [const] bool
+        +setLength(size_t newLength) : void
+        +setStepEnabled(size_t stepIndex, bool enabled) : void
+        +setStepInterval(TimeDivision interval) : void
+        +setStepNote(size_t stepIndex, uint8_t note) : [const] void
+        +setStepNoteLength(size_t stepIndex, TimeDivision length) : void
+        +setStepOffset(size_t stepIndex, float offset) : void
+        +setStepProbability(size_t stepIndex, float probability) : [const] void
+        +setStepSwingAffected(size_t stepIndex, bool affected) : void
+        +setStepTrackId(size_t stepIndex, uint32_t trackId) : void
+        +setStepVelocity(size_t stepIndex, uint8_t velocity) : [const] void
+        +setSwingAmount(float amount) : void
+        -updateStepTiming(size_t stepIndex, bool acquireLock = false) : void
+        -activeBuffer : std::atomic&lt;size_t&gt;
+        -leakDetector74 : juce::LeakedObjectDetector&lt;Pattern&gt;
+        -props : Properties
+        -steps : std::vector&lt;std::unique_ptr&lt;Step&gt;&gt;
+        -triggerBuffers : std::array&lt;TriggerBuffer,2&gt;
+        -updateMutex : std::mutex
+    }
+    class C_0000741483992045270854["Core::Pattern::Properties"]
+    class C_0000741483992045270854 {
+        +length : TypedProperty&lt;int&gt;
+        +stepInterval : TypedProperty&lt;TimeDivision&gt;
+        +swingAmount : TypedProperty&lt;float&gt;
+    }
+    class C_0002654016251401955249["Core::Track"]
+    class C_0002654016251401955249 {
+        +Track(ValueTree parentState, UndoManager & undoManagerToUse, uint32_t id) : void
+        -Track(const Track &) : void
+        -operator=(const Track &) : Track &
+        -ensurePatternExists() : void
+        +getActiveSteps(int startTick, int numTicks) : [const] std::vector&lt;std::pair&lt;int,const Step *&gt;&gt;
+        +getCurrentPattern() : [const] Pattern &
+        +getId() : [const] uint32_t
+        -getLeakedObjectClassName() : const char *$
+        +getMidiChannel() : [const] uint8_t
+        +getScaleMode() : [const] ScaleMode
+        +getTrackInfo() : [const] TrackInfo
+        +setMidiChannel(uint8_t channel) : void
+        +setScaleMode(ScaleMode mode) : void
+        -currentPattern : std::unique_ptr&lt;Pattern&gt;
+        -leakDetector71 : juce::LeakedObjectDetector&lt;Track&gt;
+        -props : Properties
+    }
+    class C_0002022822151375521290["Core::TypedProperty&lt;Core::ScaleMode&gt;"]
+    class C_0002022822151375521290 {
+    }
+    class C_0018049369700593178350["Core::Track::Properties"]
+    class C_0018049369700593178350 {
+        +midiChannel : TypedProperty&lt;uint8_t&gt;
+        +scaleMode : TypedProperty&lt;ScaleMode&gt;
+        +trackId : TypedProperty&lt;uint32_t&gt;
+    }
+    class C_0002016984366331843427["Core::Sequencer"]
+    class C_0002016984366331843427 {
+        +Sequencer(ValueTree parentState, UndoManager & undoManagerToUse) : void
+        -Sequencer(const Sequencer &) : void
+        -operator=(const Sequencer &) : Sequencer &
+        +createTrack() : uint32_t
+        -generateTrackId() : uint32_t
+        +getCurrentPatternForTrack(uint32_t trackId) : Pattern &
+        +getGlobalCustomDegrees() : [const] const std::vector&lt;uint8_t&gt; &
+        -getLeakedObjectClassName() : const char *$
+        +getScaleRoot() : [const] uint8_t
+        +getScaleType() : [const] Scale::Type
+        +getSwingAmount() : [const] float
+        +getTimingManager() : TimingManager &
+        +getTrack(uint32_t trackId) : Track &
+        +getTrackCount() : [const] size_t
+        +getTracks() : std::vector&lt;std::unique_ptr&lt;Track&gt;&gt; &
+        +prepare(double sampleRate) : void
+        +processBlock(const juce::AudioPlayHead * playHead, int numSamples, juce::MidiBuffer & midiOut) : void
+        +removeTrack(uint32_t trackId) : bool
+        +setCustomScale(const std::vector&lt;uint8_t&gt; & degrees, uint8_t root) : void
+        +setScale(Scale::Type type, uint8_t root) : void
+        +setSwingAmount(float amount) : void
+        -updateTrackSwing() : void
+        -currentSampleRate : double
+        -globalCustomDegrees : std::vector&lt;uint8_t&gt;
+        -globalScale : Scale
+        -leakDetector71 : juce::LeakedObjectDetector&lt;Sequencer&gt;
+        -nextTrackId : uint32_t
+        -props : Properties
+        -scaleRoot : uint8_t
+        -scaleType : Scale::Type
+        -stepProcessor : StepProcessor
+        -timingManager : TimingManager
+        -tracks : std::vector&lt;std::unique_ptr&lt;Track&gt;&gt;
+    }
+    class C_0014406921181289796232["Core::Sequencer::Properties"]
+    class C_0014406921181289796232 {
+        +swingAmount : TypedProperty&lt;float&gt;
+    }
+    class C_0001801783519848301972["::AEffect"]
+    class C_0001801783519848301972 {
+    }
+    class C_0009576758060044126248["::__CFString"]
+    class C_0009576758060044126248 {
+    }
+    class C_0014426228097136697117["::ComponentInstanceRecord"]
+    class C_0014426228097136697117 {
+    }
+    C_0016821419841954520522 o-- C_0003593103974725905685 : -type
+    C_0016821419841954520522 ()-- C_0003593103974725905685 : 
+    C_0003828068192374320393 o-- C_0003161580071859362439 : +scaleMode
+    C_0008892747186919486775 ..> C_0014923543885965065796 : 
+    C_0008892747186919486775 o-- C_0017162824566456018718 : +musicalPosition
+    C_0014923543885965065796 ..> C_0008892747186919486775 : 
+    C_0014923543885965065796 o-- C_0017162824566456018718 : -musicalPosition
+    C_0007535760439577940486 ..> C_0017162824566456018718 : 
+    C_0007535760439577940486 o-- C_0014923543885965065796 : -internalTransport
+    C_0007535760439577940486 o-- C_0008892747186919486775 : -currentTiming
+    C_0009130430079672521979 ..> C_0015922229309002665142 : 
+    C_0009130430079672521979 ..> C_0003828068192374320393 : 
+    C_0009130430079672521979 ..> C_0016821419841954520522 : 
+    C_0009130430079672521979 o-- C_0009130430079672521979 : -leakDetector41
+    C_0007678414277767949348 ..> C_0013521205381721934084 : 
+    C_0015922229309002665142 ..> C_0009414825008097351890 : 
+    C_0015922229309002665142 o-- C_0013792724424423021550 : -props
+    C_0015922229309002665142 o-- C_0015922229309002665142 : -leakDetector136
+    C_0007678414277767949348 <|-- C_0015922229309002665142 : 
+    C_0015636944018152444051 ..|> C_0013521205381721934084 : 
+    C_0008116854928933620944 ..|> C_0013521205381721934084 : 
+    C_0009284858280421301190 ..|> C_0013521205381721934084 : 
+    C_0006974241629215312200 ..|> C_0013521205381721934084 : 
+    C_0006970304373437225449 ..|> C_0013521205381721934084 : 
+    C_0017115289922782562586 ..> C_0009414825008097351890 : 
+    C_0017115289922782562586 ..|> C_0013521205381721934084 : 
+    C_0015922229309002665142 ()-- C_0013792724424423021550 : 
+    C_0013792724424423021550 o-- C_0015636944018152444051 : +enabled
+    C_0013792724424423021550 o-- C_0008116854928933620944 : +note
+    C_0013792724424423021550 o-- C_0008116854928933620944 : +velocity
+    C_0013792724424423021550 o-- C_0009284858280421301190 : +probability
+    C_0013792724424423021550 o-- C_0009284858280421301190 : +timingOffset
+    C_0013792724424423021550 o-- C_0015636944018152444051 : +affectedBySwing
+    C_0013792724424423021550 o-- C_0006974241629215312200 : +triggerTick
+    C_0013792724424423021550 o-- C_0006970304373437225449 : +trackId
+    C_0013792724424423021550 o-- C_0017115289922782562586 : +noteLength
+    C_0003463039508841737728 ..> C_0009414825008097351890 : 
+    C_0003463039508841737728 o-- C_0008651503874203565488 : -triggerBuffers
+    C_0003463039508841737728 o-- C_0000741483992045270854 : -props
+    C_0003463039508841737728 o-- C_0015922229309002665142 : -steps
+    C_0003463039508841737728 o-- C_0003463039508841737728 : -leakDetector74
+    C_0007678414277767949348 <|-- C_0003463039508841737728 : 
+    C_0003463039508841737728 ()-- C_0000741483992045270854 : 
+    C_0000741483992045270854 o-- C_0006974241629215312200 : +length
+    C_0000741483992045270854 o-- C_0009284858280421301190 : +swingAmount
+    C_0000741483992045270854 o-- C_0017115289922782562586 : +stepInterval
+    C_0002654016251401955249 ..> C_0003161580071859362439 : 
+    C_0002654016251401955249 ..> C_0003828068192374320393 : 
+    C_0002654016251401955249 ..> C_0015922229309002665142 : 
+    C_0002654016251401955249 o-- C_0018049369700593178350 : -props
+    C_0002654016251401955249 o-- C_0003463039508841737728 : -currentPattern
+    C_0002654016251401955249 o-- C_0002654016251401955249 : -leakDetector71
+    C_0007678414277767949348 <|-- C_0002654016251401955249 : 
+    C_0002022822151375521290 ..> C_0003161580071859362439 : 
+    C_0002022822151375521290 ..|> C_0013521205381721934084 : 
+    C_0002654016251401955249 ()-- C_0018049369700593178350 : 
+    C_0018049369700593178350 o-- C_0006970304373437225449 : +trackId
+    C_0018049369700593178350 o-- C_0008116854928933620944 : +midiChannel
+    C_0018049369700593178350 o-- C_0002022822151375521290 : +scaleMode
+    C_0002016984366331843427 ..> C_0003463039508841737728 : 
+    C_0002016984366331843427 o-- C_0014406921181289796232 : -props
+    C_0002016984366331843427 o-- C_0007535760439577940486 : -timingManager
+    C_0002016984366331843427 o-- C_0009130430079672521979 : -stepProcessor
+    C_0002016984366331843427 o-- C_0002654016251401955249 : -tracks
+    C_0002016984366331843427 o-- C_0016821419841954520522 : -globalScale
+    C_0002016984366331843427 o-- C_0003593103974725905685 : -scaleType
+    C_0002016984366331843427 o-- C_0002016984366331843427 : -leakDetector71
+    C_0007678414277767949348 <|-- C_0002016984366331843427 : 
+    C_0002016984366331843427 ()-- C_0014406921181289796232 : 
+    C_0014406921181289796232 o-- C_0009284858280421301190 : +swingAmount
+
+%% Generated with clang-uml, version 0.6.0
+%% LLVM version Homebrew clang version 19.1.7

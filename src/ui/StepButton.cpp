@@ -12,31 +12,35 @@ void StepButton::paint(juce::Graphics& g)
     const auto bounds = getLocalBounds().toFloat();
 
     // Background
-    g.setColour(enabled ? juce::Colours::darkgreen : juce::Colours::darkgrey);
+    g.setColour(enabled ? juce::Colours::darkgreen : juce::Colour::fromRGB(40, 40, 40));
     g.fillRect(bounds);
 
     // Selection highlight
     if (selected)
     {
-        g.setColour(juce::Colours::white.withAlpha(0.3f));
+        if (enabled)
+            g.setColour(juce::Colours::green);
+        else
+            g.setColour(juce::Colour::fromRGB(40, 40, 40));
+
         g.fillRect(bounds);
     }
 
     // Trigger indicator
     if (triggered)
     {
-        g.setColour(juce::Colours::yellow);
-        auto triggerBounds = bounds.reduced(bounds.getWidth() * 0.3f);
-        const auto radius = triggerBounds.getWidth() * 0.5f;
-        triggerBounds.setX(triggerBounds.getCentreX() - radius / 2);
-        triggerBounds.setHeight(radius);
-        triggerBounds.setWidth(radius);
-        g.fillEllipse(triggerBounds);
+        g.setColour(juce::Colours::red);
+        const auto diameter = 4.0f;
+        const auto centeredBounds = bounds.withSizeKeepingCentre(diameter, diameter);
+        g.fillEllipse(centeredBounds);
     }
 
     // Border
     g.setColour(juce::Colours::black);
-    g.drawRect(bounds, 1.0f);
+    if (selected)
+        g.drawRect(bounds, 2.0f);
+    else
+        g.drawRect(bounds, 1.0f);
 }
 
 void StepButton::mouseDown(const juce::MouseEvent& event)

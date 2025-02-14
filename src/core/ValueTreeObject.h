@@ -108,6 +108,18 @@ protected:
         state.removeListener(this);
     }
 
+    void valueTreePropertyChanged(
+        ValueTree& treeWhosePropertyHasChanged,
+        const Identifier& property) override
+    {
+        DBG("ValueTreeObject::valueTreePropertyChanged: " << property.toString());
+    }
+
+    void valueTreeChildAdded(ValueTree& parentTree, ValueTree& childWhichHasBeenAdded) override
+    {
+        DBG("ValueTreeObject::valueTreeChildAdded: " << childWhichHasBeenAdded.getType().toString());
+    }
+
 public:
     template <typename T>
     void setProperty(const Identifier& id, T value)

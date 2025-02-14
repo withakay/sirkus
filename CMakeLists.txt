@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
+set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # make it easier to include cmake modules from ./cmake/

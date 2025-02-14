@@ -216,14 +216,14 @@ void CustomLookAndFeel::drawLinearSliderThumb(
     Slider::SliderStyle style,
     Slider& slider)
 {
-    auto sliderRadius = (float) (getSliderThumbRadius(slider) - 2);
+    auto sliderRadius = (float) (getSliderThumbRadius(slider) / 3);
 
     auto isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
 
-    auto knobColour = slider.findColour(Slider::thumbColourId)
-                            .withMultipliedSaturation(
-                                (slider.hasKeyboardFocus(false) || isDownOrDragging) ? 1.3f : 0.9f)
-                            .withMultipliedAlpha(slider.isEnabled() ? 1.0f : 0.7f);
+    auto knobColour = juce::Colour::fromRGB(80, 180, 80)
+                      .withMultipliedSaturation(
+                          (slider.hasKeyboardFocus(false) || isDownOrDragging) ? 1.3f : 0.9f)
+                      .withMultipliedAlpha(slider.isEnabled() ? 1.0f : 0.7f);
 
     if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
     {
@@ -443,110 +443,110 @@ void SquareLookAndFeel::drawTickBox(
     }
 }
 
-void SquareLookAndFeel::drawLinearSliderThumb(
-    Graphics& g,
-    int x,
-    int y,
-    int width,
-    int height,
-    float sliderPos,
-    float minSliderPos,
-    float maxSliderPos,
-    Slider::SliderStyle style,
-    Slider& slider)
-{
-    auto sliderRadius = (float) getSliderThumbRadius(slider);
+// void SquareLookAndFeel::drawLinearSliderThumb(
+//     Graphics& g,
+//     int x,
+//     int y,
+//     int width,
+//     int height,
+//     float sliderPos,
+//     float minSliderPos,
+//     float maxSliderPos,
+//     Slider::SliderStyle style,
+//     Slider& slider)
+// {
+//     auto sliderRadius = (float) getSliderThumbRadius(slider);
+//
+//     bool isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
+//
+//     auto knobColour = slider.findColour(Slider::rotarySliderFillColourId)
+//                             .withMultipliedSaturation(
+//                                 (slider.hasKeyboardFocus(false) || isDownOrDragging) ? 1.3f : 0.9f)
+//                             .withMultipliedAlpha(slider.isEnabled() ? 1.0f : 0.7f);
+//
+//     g.setColour(knobColour);
+//
+//     if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
+//     {
+//         float kx, ky;
+//
+//         if (style == Slider::LinearVertical)
+//         {
+//             kx = (float) x + (float) width * 0.5f;
+//             ky = sliderPos;
+//             g.fillRect(Rectangle<float>(kx - sliderRadius, ky - 2.5f, sliderRadius * 2.0f, 5.0f));
+//         }
+//         else
+//         {
+//             kx = sliderPos;
+//             ky = (float) y + (float) height * 0.5f;
+//             g.fillRect(Rectangle<float>(kx - 2.5f, ky - sliderRadius, 5.0f, sliderRadius * 2.0f));
+//         }
+//     }
+//     else
+//     {
+//         // Just call the base class for the demo
+//         LookAndFeel_V2::drawLinearSliderThumb(
+//             g,
+//             x,
+//             y,
+//             width,
+//             height,
+//             sliderPos,
+//             minSliderPos,
+//             maxSliderPos,
+//             style,
+//             slider);
+//     }
+// }
 
-    bool isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
-
-    auto knobColour = slider.findColour(Slider::rotarySliderFillColourId)
-                            .withMultipliedSaturation(
-                                (slider.hasKeyboardFocus(false) || isDownOrDragging) ? 1.3f : 0.9f)
-                            .withMultipliedAlpha(slider.isEnabled() ? 1.0f : 0.7f);
-
-    g.setColour(knobColour);
-
-    if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
-    {
-        float kx, ky;
-
-        if (style == Slider::LinearVertical)
-        {
-            kx = (float) x + (float) width * 0.5f;
-            ky = sliderPos;
-            g.fillRect(Rectangle<float>(kx - sliderRadius, ky - 2.5f, sliderRadius * 2.0f, 5.0f));
-        }
-        else
-        {
-            kx = sliderPos;
-            ky = (float) y + (float) height * 0.5f;
-            g.fillRect(Rectangle<float>(kx - 2.5f, ky - sliderRadius, 5.0f, sliderRadius * 2.0f));
-        }
-    }
-    else
-    {
-        // Just call the base class for the demo
-        LookAndFeel_V2::drawLinearSliderThumb(
-            g,
-            x,
-            y,
-            width,
-            height,
-            sliderPos,
-            minSliderPos,
-            maxSliderPos,
-            style,
-            slider);
-    }
-}
-
-void SquareLookAndFeel::drawRotarySlider(
-    Graphics& g,
-    int x,
-    int y,
-    int width,
-    int height,
-    float sliderPos,
-    float rotaryStartAngle,
-    float rotaryEndAngle,
-    Slider& slider)
-{
-    auto diameter = (float) jmin(width, height) - 4.0f;
-    auto radius = (diameter / 2.0f) * std::cos(MathConstants<float>::pi / 4.0f);
-    auto centreX = (float) x + (float) width * 0.5f;
-    auto centreY = (float) y + (float) height * 0.5f;
-    auto rx = centreX - radius;
-    auto ry = centreY - radius;
-    auto rw = radius * 2.0f;
-    auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-    bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
-
-    auto baseColour = slider.isEnabled()
-                          ? slider.findColour(Slider::rotarySliderFillColourId).withAlpha(isMouseOver ? 0.8f : 1.0f)
-                          : Colour(0x80808080);
-
-    Rectangle<float> r(rx, ry, rw, rw);
-    auto transform = AffineTransform::rotation(angle, r.getCentreX(), r.getCentreY());
-
-    auto x1 = r.getTopLeft().getX();
-    auto y1 = r.getTopLeft().getY();
-    auto x2 = r.getBottomLeft().getX();
-    auto y2 = r.getBottomLeft().getY();
-
-    transform.transformPoints(x1, y1, x2, y2);
-
-    g.setGradientFill(ColourGradient(baseColour, x1, y1, baseColour.darker(0.1f), x2, y2, false));
-
-    Path knob;
-    knob.addRectangle(r);
-    g.fillPath(knob, transform);
-
-    Path needle;
-    auto r2 = r * 0.1f;
-    needle.addRectangle(r2.withPosition({r.getCentreX() - (r2.getWidth() / 2.0f), r.getY()}));
-
-    g.setColour(slider.findColour(Slider::rotarySliderOutlineColourId));
-    g.fillPath(needle, AffineTransform::rotation(angle, r.getCentreX(), r.getCentreY()));
-}
+// void SquareLookAndFeel::drawRotarySlider(
+//     Graphics& g,
+//     int x,
+//     int y,
+//     int width,
+//     int height,
+//     float sliderPos,
+//     float rotaryStartAngle,
+//     float rotaryEndAngle,
+//     Slider& slider)
+// {
+//     auto diameter = (float) jmin(width, height) - 4.0f;
+//     auto radius = (diameter / 2.0f) * std::cos(MathConstants<float>::pi / 4.0f);
+//     auto centreX = (float) x + (float) width * 0.5f;
+//     auto centreY = (float) y + (float) height * 0.5f;
+//     auto rx = centreX - radius;
+//     auto ry = centreY - radius;
+//     auto rw = radius * 2.0f;
+//     auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+//     bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+//
+//     auto baseColour = slider.isEnabled()
+//                           ? slider.findColour(Slider::rotarySliderFillColourId).withAlpha(isMouseOver ? 0.8f : 1.0f)
+//                           : Colour(0x80808080);
+//
+//     Rectangle<float> r(rx, ry, rw, rw);
+//     auto transform = AffineTransform::rotation(angle, r.getCentreX(), r.getCentreY());
+//
+//     auto x1 = r.getTopLeft().getX();
+//     auto y1 = r.getTopLeft().getY();
+//     auto x2 = r.getBottomLeft().getX();
+//     auto y2 = r.getBottomLeft().getY();
+//
+//     transform.transformPoints(x1, y1, x2, y2);
+//
+//     g.setGradientFill(ColourGradient(baseColour, x1, y1, baseColour.darker(0.1f), x2, y2, false));
+//
+//     Path knob;
+//     knob.addRectangle(r);
+//     g.fillPath(knob, transform);
+//
+//     Path needle;
+//     auto r2 = r * 0.1f;
+//     needle.addRectangle(r2.withPosition({r.getCentreX() - (r2.getWidth() / 2.0f), r.getY()}));
+//
+//     g.setColour(slider.findColour(Slider::rotarySliderOutlineColourId));
+//     g.fillPath(needle, AffineTransform::rotation(angle, r.getCentreX(), r.getCentreY()));
+// }
 
 } // namespace Sirkus::UI
