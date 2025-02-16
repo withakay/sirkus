@@ -115,7 +115,9 @@ protected:
         DBG("ValueTreeObject::valueTreePropertyChanged: " << property.toString());
     }
 
-    void valueTreeChildAdded(ValueTree& parentTree, ValueTree& childWhichHasBeenAdded) override
+    void valueTreeChildAdded(
+        ValueTree& parentTree,
+        ValueTree& childWhichHasBeenAdded) override
     {
         DBG("ValueTreeObject::valueTreeChildAdded: " << childWhichHasBeenAdded.getType().toString());
     }

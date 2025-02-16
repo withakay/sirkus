@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "../core/Track.h"
+
 namespace Sirkus::UI {
 
 class PatternTrack : public juce::Component, private StepComponent::Listener
@@ -24,7 +26,8 @@ public:
     static constexpr int MIN_PATTERN_LENGTH = 1;
     static constexpr int MAX_PATTERN_LENGTH = 128;
 
-    explicit PatternTrack(int trackNumber);
+    //explicit PatternTrack(int trackNumber);
+    explicit PatternTrack(Sirkus::Core::Track& track);
     ~PatternTrack() override;
 
     void paint(juce::Graphics&) override;
@@ -103,6 +106,7 @@ private:
     std::vector<std::unique_ptr<StepComponent>> stepComponents;
     std::vector<int> selectedStepIndices;
 
+    Core::Track* track;
     int trackNumber;
     int midiChannel{-1}; // -1 = omni
     int currentPage{0};

@@ -1,9 +1,11 @@
 #include "PatternTrack.h"
 
+#include "TrackPanelConfig.h"
+
 namespace Sirkus::UI {
 
-PatternTrack::PatternTrack(int trackNum)
-    : trackNumber(trackNum)
+PatternTrack::PatternTrack(Core::Track& track)
+    : track(&track)
 {
     // Create MIDI channel selector
     midiChannelSelector = std::make_unique<juce::ComboBox>();
@@ -60,7 +62,7 @@ PatternTrack::PatternTrack(int trackNum)
     for (int i = 0; i < VISIBLE_STEPS; ++i)
     {
         auto component = std::make_unique<StepComponent>();
-        component->setStep()
+        component->setStep(&track.getCurrentPattern().getStep(i));
         component->addListener(this);
         addAndMakeVisible(component.get());
         stepComponents.push_back(std::move(component));
